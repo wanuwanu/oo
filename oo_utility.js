@@ -74,7 +74,7 @@ oo.getArrayDiff = function (array1, array2) {
   for (var x of array1) {
     if (array2.indexOf(x) === -1) diff.push(x);
   }
-  for (var x of array2) {
+  for (x of array2) {
     if (array1.indexOf(x) === -1) diff.push(x);
   }
   return diff;
