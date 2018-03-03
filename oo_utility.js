@@ -74,7 +74,7 @@ oo.getArrayDiff = function (array1, array2) {
   for (var x of array1) {
     if (array2.indexOf(x) === -1) diff.push(x);
   }
-  for (  x of array2) {
+  for (x of array2) {
     if (array1.indexOf(x) === -1) diff.push(x);
   }
   return diff;
@@ -187,33 +187,6 @@ oo.arraySwap = function (array, a, b) {
   var tmp = array[a];
   array[a] = array[b];
   array[b] = tmp;
-};
-
-// マージソート
-oo.sort = function (data, compare) {
-
-  var mergeSort = function (first, last) {
-    if (first >= last) return;
-    if (last - first == 1) {
-      if (compare(data[first], data[last]) > 0) oo.arraySwap(data, first, last);
-      return;
-    }
-    var middle = Math.floor((first + last) / 2);
-    mergeSort(first, middle);
-    mergeSort(middle + 1, last);
-
-    var work = [];
-    var p = 0;
-    for (var i = first; i <= middle; i++) work[p++] = data[i];
-
-    var i = middle + 1;
-    var j = 0;
-    var k = first;
-    while (i <= last && j < p) data[k++] = (compare(work[j], data[i]) <= 0) ? work[j++] : data[i++];
-    while (j < p) data[k++] = work[j++];
-  };
-
-  mergeSort(0, data.length - 1);
 };
 
 // csvをマトリックス(array * array)に変換
