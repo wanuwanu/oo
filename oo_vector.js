@@ -73,12 +73,10 @@ class Oo2DVector {
     return this;
   }
 
-  getSquareMagnitude() {
-    return this.x * this.x + this.y * this.y;
-  }
-
-  getMagnitude() {
-    return Math.sqrt(this.getSquareMagnitude());
+  round() {
+    this.x = Math.round(this.x);
+    this.y = Math.round(this.y);
+    return this;
   }
 
   normalize() {
@@ -89,33 +87,55 @@ class Oo2DVector {
     return this;
   }
 
+  getRound() {
+    return this.clone().round();
+  }
+
   getNormal() {
     return this.clone().normalize();
-
-    // var r = new Oo2DVector();
-    // r.set(this);
-    // r.normalize();
-    // return r;
   }
 
-  static add(a, b) {
-    return new Oo2DVector(a.x + b.x, a.y + b.y);
-  }
-  static sub(a, b) {
-    return new Oo2DVector(a.x - b.x, a.y - b.y);
-  }
-  static mul(a, b) {
-    return new Oo2DVector(a.x * b.x, a.y * b.y);
-  }
-  static div(a, b) {
-    return new Oo2DVector(a.x / b.x, a.y / b.y);
+  getSquareMagnitude() {
+    return this.x * this.x + this.y * this.y;
   }
 
-  static dot(a, b){
-    return a.x * b.x + a.y * b.y;
+  getMagnitude() {
+    return Math.sqrt(this.getSquareMagnitude());
   }
-  static cross(a, b){
-    return a.x * b.y - a.y * b.x;
+
+  getAtan2() {
+    return Math.atan2(this.y, this.x);
   }
-  
+
+  getDegree() {
+    return Math.atan2(this.y, this.x) * 180.0 / Math.PI;
+  }
+
+  static add(v0, v1) {
+    return new Oo2DVector(v0.x + v1.x, v0.y + v1.y);
+  }
+  static sub(v0, v1) {
+    return new Oo2DVector(v0.x - v1.x, v0.y - v1.y);
+  }
+  static mul(v0, v1) {
+    return new Oo2DVector(v0.x * v1.x, v0.y * v1.y);
+  }
+  static div(v0, v1) {
+    return new Oo2DVector(v0.x / v1.x, v0.y / v1.y);
+  }
+
+  static dot(v0, v1) {
+    return v0.x * v1.x + v0.y * v1.y;
+  }
+
+  static cross(v0, v1) {
+    return v0.x * v1.y - v0.y * v1.x;
+  }
+
+  static lerp(v0, v1, alpha) {
+    return new Oo2DVector(
+      (1.0 - alpha) * v0.x + alpha * v1.x,
+      (1.0 - alpha) * v0.y + alpha * v1.y
+    );
+  }
 }
