@@ -25,7 +25,7 @@ oo.sort = function (array, compare_func) {
     var p = 0;
     for (var i = first; i <= middle; i++) work[p++] = array[i];
 
-    var i = middle + 1;
+    i = middle + 1;
     var j = 0;
     var k = first;
     while (i <= last && j < p) array[k++] = (compare_func(work[j], array[i]) <= 0) ? work[j++] : array[i++];
