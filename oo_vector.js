@@ -73,6 +73,20 @@ class Oo2DVector {
     return this;
   }
 
+  clamp(min, max) {
+    if(this.x < min) this.x = min;
+    if(this.y < min) this.y = min;
+    if(this.x > max) this.x = max;
+    if(this.y > max) this.y = max;
+    return this;
+  }
+
+  negative() {
+    this.x = - this.x;
+    this.y = - this.y;
+    return this;
+  }
+
   round() {
     this.x = Math.round(this.x);
     this.y = Math.round(this.y);
@@ -85,6 +99,10 @@ class Oo2DVector {
     this.x *= s;
     this.y *= s;
     return this;
+  }
+
+  getNegative() {
+    return this.clone().negative();
   }
 
   getRound() {
@@ -114,12 +132,15 @@ class Oo2DVector {
   static add(v0, v1) {
     return new Oo2DVector(v0.x + v1.x, v0.y + v1.y);
   }
+
   static sub(v0, v1) {
     return new Oo2DVector(v0.x - v1.x, v0.y - v1.y);
   }
+
   static mul(v0, v1) {
     return new Oo2DVector(v0.x * v1.x, v0.y * v1.y);
   }
+
   static div(v0, v1) {
     return new Oo2DVector(v0.x / v1.x, v0.y / v1.y);
   }
@@ -132,10 +153,15 @@ class Oo2DVector {
     return v0.x * v1.y - v0.y * v1.x;
   }
 
+  static distance(v0, v1) {
+    return Oo2DVector.sub(v0, v1).getMagnitude();
+  }
+
   static lerp(v0, v1, alpha) {
     return new Oo2DVector(
       (1.0 - alpha) * v0.x + alpha * v1.x,
       (1.0 - alpha) * v0.y + alpha * v1.y
     );
   }
+
 }
