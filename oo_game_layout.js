@@ -91,7 +91,7 @@ class OoGameLayoutCell {
       var a = oo.clamp(this.align, 1, 9);
 
       var text_rect = oo.createOoRectWithXYWH(this.x, this.y, 0, 0);
-      var r = oo.getAlignedRect(this.rect, text_rect, a);
+      r = oo.getAlignedRect(this.rect, text_rect, a);
 
       var text_align = ['left', 'center', 'right'];
       var text_base_line = ['top', 'middle', 'bottom'];
