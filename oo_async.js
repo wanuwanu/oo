@@ -54,7 +54,7 @@ oo.createAsyncGeneratorWithImageList = function (target, base_path, image_list, 
     var path = (base_path === undefined) ? '' : base_path + '/';
     for (var name of image_list) {
       if (Array.isArray(name)) {
-        yield target[name] = oo.asyncCreateImage(proceeder, path + name + ext);
+        yield target[name[0]] = oo.asyncCreateImage(proceeder, path + name[1] + ext);
       } else {
         yield target[name] = oo.asyncCreateImage(proceeder, path + name + ext);
       }
