@@ -11,6 +11,7 @@ oo.async = function (callback) {
   img.onerror = callback;
 };
 
+// ex.
 // oo.serial(function* (proceeder) {
 //   yield asyncFunction1(proceeder);
 //   yield asyncFunction2(proceeder);
@@ -48,10 +49,26 @@ oo.createAsyncGeneratorWithList = function (async_function, list) {
   };
 };
 
+// ex.
+// var target_obj = {};
+// var list1 = [
+//   ['image_a'],
+//   ['image_b'],
+// ];
+// oo.createAsyncGeneratorWithImageList(target_obj, 'iamge', list1, 'png');
+//
+// var list2 = [
+//   ['image_a', 'image/image_a'],
+//   ['image_b', 'image/image_b'],
+// ];
+// oo.createAsyncGeneratorWithImageList(target_obj, '', list2, 'png');
+
 oo.createAsyncGeneratorWithImageList = function (target, base_path, image_list, extension) {
   return function* (proceeder) {
-    var ext = (extension === undefined) ? '' : '.' + extension;
-    var path = (base_path === undefined) ? '' : base_path + '/';
+    var ext = '';
+    var path = '';
+    if (extension) ext = '.' + extension;
+    if (base_path) path = base_path + '/';
     for (var name of image_list) {
       if (Array.isArray(name)) {
         yield target[name[0]] = oo.asyncCreateImage(proceeder, path + name[1] + ext);
@@ -88,65 +105,5 @@ oo.createAsyncFunction = function (base_function) {
   return function (proceeder) {
     base_function();
     oo.async(proceeder);
-  };
-};
-
-
-
-
-// 廃止予定
-oo.createSyncGeneratorForImageList = function (target, image_list, base_path) {
-  return function* (proceed) {
-    for (var item of image_list) yield target[item[0]] = oo.syncCreateImage(proceed, item[1], base_path);
-  };
-};
-
-// 廃止予定
-oo.createSyncGeneratorForImageList2 = function (target, base_path, image_list, extension) {
-  return function* (proceed) {
-    for (var name of image_list) yield target[name] = oo.syncCreateImage(proceed, name + '.' + extension, base_path);
-  };
-};
-
-// 廃止予定
-oo.syncCreateImage = function (proceed, file, base_path) {
-  var img = new Image();
-  if (base_path) file = base_path + '/' + file;
-  img.src = file;
-  img.onload = proceed;
-  img.onerror = proceed;
-  return img;
-};
-
-// 廃止予定
-oo.syncAppendScript = function (proceed, file) {
-  var script = document.createElement('script');
-  script.src = file;
-  script.onload = proceed;
-  document.body.appendChild(script);
-};
-
-// 廃止予定
-// sync化
-oo.sync = function (proceed, baseFunction) {
-  setTimeout(proceed, 0);
-  baseFunction();
-};
-
-// 廃止予定
-// syncFunction化
-oo.syncFunc = function (baseFunction) {
-  return function (proceed) {
-    setTimeout(proceed, 0);
-    baseFunction();
-  };
-};
-
-// 廃止予定
-// syncGenerator化
-oo.syncGen = function (baseFunction) {
-  return function* (proceed) {
-    baseFunction();
-    yield setTimeout(proceed, 0);
   };
 };
