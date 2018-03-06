@@ -95,27 +95,6 @@ oo.createImageFromFile = function (file) {
   return img;
 };
 
-oo.clamp = function (x, a, b) {
-  if (x < a) return a;
-  if (x > b) return b;
-  return x;
-};
-
-oo.lerp = function (v0, v1, alpha) {
-  return (1.0 - alpha) * v0 + alpha * v1;
-};
-
-oo.saturate = function (x) {
-  if (x < 0.0) return 0.0;
-  if (x > 1.0) return 1.0;
-  return x;
-};
-
-oo.smoothstep = function (v0, v1, v) {
-  if (v0 === v1) return 0.0;
-  return oo.saturate((v - v0) / (v1 - v0));
-};
-
 // 配列の要素の交換
 oo.arraySwap = function (array, a, b) {
   var tmp = array[a];
