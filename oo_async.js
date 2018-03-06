@@ -95,6 +95,23 @@ oo.asyncAppendScript = function (proceeder, file) {
   document.body.appendChild(script);
 };
 
+oo.asyncLoadText = function (proceed, file) {
+  var obj = {};
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', file, true);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 0 || xhr.status === 200) {
+        obj['text'] = xhr.response;
+        proceed();
+      }
+    }
+  };
+  xhr.send('');
+  return obj;
+};
+
+
 // 通常関数のasync化
 oo.asyncFunction = function (proceeder, base_function) {
   base_function();
