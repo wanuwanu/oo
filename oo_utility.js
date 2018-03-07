@@ -14,6 +14,7 @@ oo.getArrayDiff = function (array1, array2) {
   return diff;
 };
 
+
 oo.setupLogEnv = function () {
   var div = null;
   oo.log = function (log) {
