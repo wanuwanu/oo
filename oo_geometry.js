@@ -37,6 +37,5 @@ oo.getAttenuatedSineWave = function (t, t0, t1, frequency, amplitude) {
   var x = frequency * oo.k2Pi * t / (t1 - t0);
   var y = a * Math.sin(x) * amplitude;
   return y;
-
 };
 

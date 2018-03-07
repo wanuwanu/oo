@@ -74,10 +74,10 @@ class Oo2DVector {
   }
 
   clamp(min, max) {
-    if(this.x < min) this.x = min;
-    if(this.y < min) this.y = min;
-    if(this.x > max) this.x = max;
-    if(this.y > max) this.y = max;
+    if (this.x < min) this.x = min;
+    if (this.y < min) this.y = min;
+    if (this.x > max) this.x = max;
+    if (this.y > max) this.y = max;
     return this;
   }
 
@@ -162,6 +162,21 @@ class Oo2DVector {
       (1.0 - alpha) * v0.x + alpha * v1.x,
       (1.0 - alpha) * v0.y + alpha * v1.y
     );
+  }
+
+  static cubicBezierCurves(v0, v1, v2, v3, alpha) {
+    var t = alpha;
+    var s = 1.0 - t;
+    var k0 = s * s * s;
+    var k1 = 3.0 * s * s * t;
+    var k2 = 3.0 * s * t * t;
+    var k3 = t * t * t;
+ 
+    var v = v0.clone().mul(k0);
+    v.add(v1.clone().mul(k1));
+    v.add(v2.clone().mul(k2));
+    v.add(v3.clone().mul(k3));
+    return v;
   }
 
 }
