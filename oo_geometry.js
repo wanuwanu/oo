@@ -39,3 +39,28 @@ oo.getAttenuatedSineWave = function (t, t0, t1, frequency, amplitude) {
   return y;
 };
 
+// 標準シグモイド関数
+oo.sigmoid = function (x) {
+  return 1.0 / (1.0 + Math.exp(- x));
+};
+
+// シグモイド関数の区間[-a,a]を利用した補間パラメータ
+// [-a,a]の範囲が、xの範囲[0,1]になり、0.0～1.0を返す
+// aは1以上を指定(6程度が通常、1では線形補間に近くなる)
+oo.sigmoidStep = function (x, a) {
+  if (x <= 0.0) return 0.0;
+  if (x >= 1.0) return 1.0;
+
+  var t = 2.0 * x - 1.0;
+  var s = 1.0 / (1.0 + Math.exp(- t * a));
+
+  var ea = Math.exp(- a);
+  var k = (1.0 + ea) / (1 - ea);
+
+  return k * (s - 0.5) + 0.5;
+};
+
+// 正弦波の区間[-π/2, π/2]のカーブを利用した補間パラメータ
+oo.sineStep = function (x) {
+  return 0.5 - Math.cos(x * Math.PI) * 0.5;
+};
