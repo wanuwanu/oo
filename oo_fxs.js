@@ -79,7 +79,7 @@ class FxsTypeBase {
       for (; i < this.frame_data[j].frame_num; i++) {
         var fn0 = this.frame_data[a].frame_num;
         var fn1 = this.frame_data[b].frame_num;
-        var p = oo.smoothstep(fn0, fn1, i);
+        var p = oo.linearStep(fn0, fn1, i);
         this.frame_lerp_array[i] = new FxsLerpParam(a, b, p);
       }
       a = b;

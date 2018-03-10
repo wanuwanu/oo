@@ -27,17 +27,16 @@ oo.saturate = function (x) {
   return x;
 };
 
-oo.smoothstep = function (v0, v1, v) {
+oo.linearStep = function (v0, v1, v) {
   if (v0 === v1) return 0.0;
   return oo.saturate((v - v0) / (v1 - v0));
 };
 
-oo.getAttenuatedSineWave = function (t, t0, t1, frequency, amplitude) {
-  var a = 1.0 - t / (t1 - t0);
-  var x = frequency * oo.k2Pi * t / (t1 - t0);
-  var y = a * Math.sin(x) * amplitude;
-  return y;
-};
+// HLSL smoothstep
+// oo.smoothStep = function (v0, v1, v) {
+//   var x = oo.linearStep(v0, v1, v);
+//   return x * x * (3 - 2 * x);
+// };
 
 // 標準シグモイド関数
 oo.sigmoid = function (x) {
@@ -64,3 +63,11 @@ oo.sigmoidStep = function (x, a) {
 oo.sineStep = function (x) {
   return 0.5 - Math.cos(x * Math.PI) * 0.5;
 };
+
+oo.getAttenuatedSineWave = function (t, t0, t1, frequency, amplitude) {
+  var a = 1.0 - t / (t1 - t0);
+  var x = frequency * oo.k2Pi * t / (t1 - t0);
+  var y = a * Math.sin(x) * amplitude;
+  return y;
+};
+
