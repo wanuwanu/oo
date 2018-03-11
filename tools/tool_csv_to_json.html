@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>CSVtoJSON</title>
+  <style>
+    textarea {
+      width: 1000px;
+      height: 20em;
+    }
+  </style>
+</head>
+
+<body>
+  <div>CSVをJSONに変換します</div>
+  <div>
+    <textarea id="input" name="input" placeholder="CSVデータを入力して下さい">
+id,name,color
+1,まどか,桃
+2,ほむら,黒
+3,ともえ,黄
+4,あんず,赤
+5,助六,青</textarea>
+  </div>
+  <br>
+  <div>
+    <button id="clear">クリア</button>
+    <button id="convert_object">オブジェクトの配列に変換</button>
+    <button id="convert_array">配列の配列に変換</button>
+  </div>
+  <br>
+  <div>
+    <textarea id="output" name="output" placeholder="JSONデータが表示されます"></textarea>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const input = document.getElementById("input");
+      const output = document.getElementById("output");
+
+      function csvToArray2(csv) {
+        const n = csv.length;
+        let dq = false;
+        let item = '';
+        const array = [];
+        const line = [];
+
+        for (let i = 0; i < n; i++) {
+          const c = csv.charAt(i);
+
+          if (c === '"') {
+            if (!dq) {
+              dq = true;
+            } else {
+              if (i + 1 < n && csv.charAt(i + 1) === '"') {
+                item += '"';
+                i += 1;
+              } else {
+                dq = false;
+              }
+            }
+            continue;
+          }
+
+          if (!dq) {
+            if (c === ',') {
+              line.push(item);
+              item = '';
+              continue;
+            }
+            if (c === '\n') {
+              if (item.length || line.length) {
+                line.push(item);
+                item = '';
+              }
+              if (line.length) {
+                array.push(line);
+                line.length = 0;
+              }
+              continue;
+            }
+          }
+          item += c;
+        }
+        if (item.length) line.push(item);
+        if (line.length) array.push(line);
+        return array;
+      }
+
+      function csvToObjectArray(csv) {
+        const array = [];
+        const lines = csvToArray2(input.value);
+        for (let i = 1; i < lines.length; i++) {
+          const obj = {};
+          for (let j = 0; j < lines[i].length; j++) obj[lines[0][j]] = lines[i][j];
+          array.push(obj);
+        }
+        return array;
+      }
+
+      const clear_button = document.getElementById("clear");
+      clear_button.onclick = function () {
+        input.value = '';
+        output.value = '';
+      };
+
+      const button1 = document.getElementById("convert_object");
+      button1.onclick = function () {
+        output.value = '';
+        const json = csvToObjectArray(input.value);
+        console.log(json);
+        output.value = JSON.stringify(json, null, ' ');
+      };
+
+      const button2 = document.getElementById("convert_array");
+      button2.onclick = function () {
+        output.value = '';
+        const json = csvToArray2(input.value);
+        console.log(json);
+        output.value = JSON.stringify(json, null, ' ');
+      };
+
+    }, false);
+  </script>
+</body>
+
+</html>
