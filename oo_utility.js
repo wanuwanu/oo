@@ -2,13 +2,15 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 var oo = oo || {};
+oo.env = oo.env || {};
+oo.env.font_family = "'Hiragino Kaku Gothic ProN', 'sans-serif'";
 
 oo.getArrayDiff = function (array1, array2) {
-  var diff = [];
-  for (var x of array1) {
+  const diff = [];
+  for (const x of array1) {
     if (array2.indexOf(x) === -1) diff.push(x);
   }
-  for (x of array2) {
+  for (const x of array2) {
     if (array1.indexOf(x) === -1) diff.push(x);
   }
   return diff;
@@ -71,7 +73,7 @@ oo.drawRoundRect = function (ctx, x, y, w, h, radius, fill, stroke) {
 };
 
 oo.setTextAttributes = function (context, fontSize, fillStyle, textAlign, textBaseline) {
-  context.font = `${fontSize}px ''`;
+  context.font = `${fontSize}px ` + oo.env.font_family;
   context.fillStyle = fillStyle;
   context.textAlign = textAlign;
   context.textBaseline = textBaseline;
