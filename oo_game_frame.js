@@ -44,6 +44,7 @@ class OoGameFrame {
   }
 
   addGameScene(scene) {
+    scene.frame = this;
     this.scene_array.push(scene);
   }
 
@@ -70,7 +71,7 @@ class OoGameFrame {
     this.touch_on = false;
 
     for (var scene of this.scene_array) {
-      if (scene.scene_status === oo.gameSceneStatus.kActive) scene.update(this);
+      if (scene.scene_status === oo.gameSceneStatus.kActive) scene.update();
     }
     for (scene of this.scene_array) {
       if (scene.scene_status === oo.gameSceneStatus.kEnd) {
@@ -80,8 +81,8 @@ class OoGameFrame {
     }
     for (scene of this.scene_array) {
       if (scene.scene_status === oo.gameSceneStatus.kStart) {
-        scene.create(this);
-        scene.update(this);
+        scene.create();
+        scene.update();
         scene.scene_status = oo.gameSceneStatus.kActive;
       }
     }
@@ -89,7 +90,7 @@ class OoGameFrame {
 
   render() {
     for (var scene of this.scene_array) {
-      if (scene.scene_status === oo.gameSceneStatus.kActive) scene.render(this);
+      if (scene.scene_status === oo.gameSceneStatus.kActive) scene.render();
     }
 
     this.click_on = false;

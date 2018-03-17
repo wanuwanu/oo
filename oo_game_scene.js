@@ -12,6 +12,7 @@ oo.gameSceneStatus = {
 
 class OoGameScene {
   constructor() {
+    this.frame = null;
     this.name = '';
     this.scene_status = oo.gameSceneStatus.kInactive;
     this.next_scene = '';
@@ -21,18 +22,18 @@ class OoGameScene {
     this.fade_alpha = 0.0;
   }
 
-  create(frame) {
+  create() {
     this.scene_end = false;
   }
-  release(frame) { }
+  release() { }
 
-  update(frame) { }
-  render(frame) { }
+  update() { }
+  render() { }
 
-  changeSceneOnFadeOut(frame) {
+  changeSceneOnFadeOut() {
     if (this.next_scene === '') return;
-    frame.endScene(this.name);
-    frame.startScene(this.next_scene);
+    this.frame.endScene(this.name);
+    this.frame.startScene(this.next_scene);
   }
 
   fadeIn() {
@@ -51,13 +52,13 @@ class OoGameScene {
     if (this.fade_alpha > 1.0) this.fade_alpha = 1.0;
   }
 
-  updateFade(frame) {
+  updateFade() {
     this.setFadeAlpha();
     if (this.fade_counter !== 0) this.fade_counter++;
-    if (this.fade_counter === this.fade_times + 2) this.changeSceneOnFadeOut(frame);
+    if (this.fade_counter === this.fade_times + 2) this.changeSceneOnFadeOut();
   }
 
-  renderFade(frame) {
-    frame.canvas.style.opacity = 1.0 - this.fade_alpha;
+  renderFade() {
+    this.frame.canvas.style.opacity = 1.0 - this.fade_alpha;
   }
 }

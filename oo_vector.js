@@ -3,8 +3,8 @@
 
 class Oo2DVector {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.x = x || 0;
+    this.y = y || 0;
   }
 
   clone() {
@@ -184,9 +184,9 @@ class Oo2DVector {
 
 class Oo3DVector {
   constructor(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.z = z || 0;
   }
 
   clone() {
