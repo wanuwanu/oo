@@ -61,7 +61,8 @@ class OoGameLayoutCell {
     var x = (ofx === undefined) ? 0 : ofx;
     var y = (ofy === undefined) ? 0 : ofy;
 
-    if (this.alpha < 1.0) ctx.globalAlpha = this.alpha;
+    const a = ctx.globalAlpha;
+    if (this.alpha < 1.0) ctx.globalAlpha = a * this.alpha;
 
     if (this.border) {
       var inner_rect = oo.createOoRectWithXYWH(this.x, this.y, this.w, this.h);
@@ -88,21 +89,21 @@ class OoGameLayoutCell {
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
 
-      var a = oo.clamp(this.align, 1, 9);
+      var align = oo.clamp(this.align, 1, 9);
 
       var text_rect = oo.createOoRectWithXYWH(this.x, this.y, 0, 0);
-      r = oo.getAlignedRect(this.rect, text_rect, a);
+      r = oo.getAlignedRect(this.rect, text_rect, align);
 
       var text_align = ['left', 'center', 'right'];
       var text_base_line = ['top', 'middle', 'bottom'];
 
-      ctx.textAlign = text_align[(a + 2) % 3];
-      ctx.textBaseline = text_base_line[Math.floor((a - 1) / 3)];
+      ctx.textAlign = text_align[(align + 2) % 3];
+      ctx.textBaseline = text_base_line[Math.floor((align - 1) / 3)];
 
       ctx.fillText(this.text, r.x0 + x, r.y0 + y);
     }
 
-    ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = a;
   }
 }
 
