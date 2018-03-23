@@ -10,6 +10,11 @@ oo.backSlashToSlash = function (path) {
   return s;
 };
 
+oo.addPath = function (folder, filename) {
+  if (folder.substr(-1) !== '/') folder += '/';
+  return folder + filename;
+};
+
 oo.getFolder = function (path) {
   path = oo.backSlashToSlash(path);
   var pos = path.lastIndexOf('/');

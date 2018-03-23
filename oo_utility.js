@@ -84,6 +84,10 @@ oo.strToInt = function (s) {
   return (Number.isInteger(n)) ? n : 0;
 };
 
+oo.zeroPadding = function (num, length) {
+  return ('0000000000' + num).slice(-length);
+};
+
 oo.createImageFromFile = function (file) {
   var img = new Image();
   img.src = file;
