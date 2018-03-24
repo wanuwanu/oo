@@ -198,8 +198,8 @@ class OoGameLayout {
       for (var cell of self.cells) {
         if (cell['tool']) continue;
         if (cell['image']) {
-          const path_name = oo.addPath(self.image_base_path, cell['image']);
-          cell.img = oo.asyncCreateImage(p, cell['image'], path_name);
+          let path_name = oo.addPath(self.image_base_path, cell['image']);
+          cell.img = oo.asyncCreateImage(p, path_name);
           yield;
         }
       }
