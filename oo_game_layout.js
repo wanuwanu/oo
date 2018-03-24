@@ -72,7 +72,7 @@ class OoGameLayoutCell {
       ctx.strokeRect(r.x0 + x, r.y0 + y, r.getW(), r.getH());
     }
 
-    if (this.img) {
+    if (this.img && this.img.width) {
       var image_rect = oo.createOoRectWithXYWH(this.x, this.y, this.img.width, this.img.height);
       r = oo.getAlignedRect(this.rect, image_rect, this.align);
       ctx.drawImage(this.img, r.x0 + x, r.y0 + y);

@@ -22,7 +22,7 @@ oo.fxsDistributionType = {
   kSphere: 3,
 };
 
-class FxsLerpParam {
+class OoFxsLerpParam {
   constructor(a, b, p) {
     this.a = (a === undefined) ? 0 : a;
     this.b = (b === undefined) ? 0 : b;
@@ -30,7 +30,7 @@ class FxsLerpParam {
   }
 }
 
-class FxsEmitterFrame {
+class OoFxsEmitterFrame {
   constructor() {
     this.frame_num = 0;
     this.num_ppf = 0.0;
@@ -54,7 +54,7 @@ class FxsEmitterFrame {
   }
 }
 
-class FxsParticleFrame {
+class OoFxsParticleFrame {
   constructor() {
     this.frame_num = 0;
     this.scale = new Oo2DVector(1, 1);
@@ -63,7 +63,7 @@ class FxsParticleFrame {
 }
 
 
-class FxsTypeBase {
+class OoFxsTypeBase {
   constructor() {
     this.frame_data = [];
     this.frame_lerp_array = [];
@@ -80,12 +80,12 @@ class FxsTypeBase {
         var fn0 = this.frame_data[a].frame_num;
         var fn1 = this.frame_data[b].frame_num;
         var p = oo.linearStep(fn0, fn1, i);
-        this.frame_lerp_array[i] = new FxsLerpParam(a, b, p);
+        this.frame_lerp_array[i] = new OoFxsLerpParam(a, b, p);
       }
       a = b;
       b = Math.min(b + 1, n - 1);
     }
-    this.frame_lerp_array[i] = new FxsLerpParam(b, b, 0.0);
+    this.frame_lerp_array[i] = new OoFxsLerpParam(b, b, 0.0);
   }
 
   getFrameLerpParam(frame_num) {
@@ -101,7 +101,7 @@ class FxsTypeBase {
   }
 }
 
-class FxsParticleType extends FxsTypeBase {
+class OoFxsParticleType extends OoFxsTypeBase {
   constructor() {
     super();
     this.id = '';
@@ -118,7 +118,7 @@ class FxsParticleType extends FxsTypeBase {
     var a = this.frame_data[lp.a];
     var b = this.frame_data[lp.b];
 
-    var fd = new FxsParticleFrame();
+    var fd = new OoFxsParticleFrame();
     fd.frame_num = frame_num;
     fd.alpha = oo.lerp(a.alpha, b.alpha, lp.p);
     fd.scale.x = oo.lerp(a.scale.x, b.scale.x, lp.p);
@@ -127,7 +127,7 @@ class FxsParticleType extends FxsTypeBase {
   }
 }
 
-class FxsEmitterType extends FxsTypeBase {
+class OoFxsEmitterType extends OoFxsTypeBase {
   constructor() {
     super();
     this.id = '';
@@ -138,7 +138,7 @@ class FxsEmitterType extends FxsTypeBase {
   }
 }
 
-class FxsEmitterStatus {
+class OoFxsEmitterStatus {
   constructor() {
     this.show = true;
     this.current_frame = -1;
@@ -151,7 +151,7 @@ class FxsEmitterStatus {
   }
 }
 
-class FxsParticleStatus {
+class OoFxsParticleStatus {
   constructor() {
     this.current_frame = 0;
     this.life_time = 0;
@@ -241,7 +241,7 @@ class OoFxs {
 
     for (let i = 0; i < ppf; i++) {
       if (es.num_particles >= et.max_particles) break;
-      es.particle_status_array[np + i] = new FxsParticleStatus();
+      es.particle_status_array[np + i] = new OoFxsParticleStatus();
       this.generateParticle(es.particle_status_array[np + i], ef, es.particle_type);
       es.num_particles++;
     }
