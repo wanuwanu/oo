@@ -21,6 +21,8 @@ oo.getCompositeOperationByBlendMode = function (blend_mode) {
 };
 
 oo.localAlpha = function (context, alpha, func) {
+  if(alpha === 0) return;
+  if(alpha === 1) return func();
   const a = context.globalAlpha;
   context.globalAlpha = a * alpha;
   func();
