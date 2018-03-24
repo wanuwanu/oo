@@ -191,28 +191,29 @@ class OoGameLayout {
     this.updateOrder();
   }
 
-  syncLoadImage(proceed) {
+  asyncLoadImage(proceeder) {
     var self = this;
 
     oo.parallel(function* (p) {
       for (var cell of self.cells) {
         if (cell['tool']) continue;
         if (cell['image']) {
-          cell.img = oo.syncCreateImage(p, cell['image'], self.image_base_path);
+          const path_name = oo.addPath(self.image_base_path, cell['image']);
+          cell.img = oo.asyncCreateImage(p, cell['image'], path_name);
           yield;
         }
       }
-    }, proceed);
+    }, proceeder);
   }
 
-  syncSetupFromFile(proceed, layout_file) {
+  asyncSetupFromFile(proceed, layout_file) {
     var self = this;
 
     oo.serial(function* (p) {
-      var obj = oo.syncLoadText(p, layout_file);
+      var obj = oo.asyncLoadText(p, layout_file);
       yield;
       self.loadJson(obj.text);
-      self.syncLoadImage(p);
+      self.asyncLoadImage(p);
       yield;
     }, proceed);
   }
