@@ -4,7 +4,7 @@
 class Oo2DVector {
   constructor(x, y) {
     this.x = x || 0;
-    this.y = y || 0;
+    this.y = (y === undefined) ? this.x : y;
   }
 
   clone() {
@@ -16,13 +16,8 @@ class Oo2DVector {
       this.x = x.x;
       this.y = x.y;
     } else {
-      if (y === undefined) {
-        this.x = x;
-        this.y = x;
-      } else {
-        this.x = x;
-        this.y = y;
-      }
+      this.x = x || 0;
+      this.y = (y === undefined) ? this.x : y;
     }
     return this;
   }
@@ -184,8 +179,8 @@ class Oo2DVector {
 class Oo3DVector {
   constructor(x, y, z) {
     this.x = x || 0;
-    this.y = y || 0;
-    this.z = z || 0;
+    this.y = (y === undefined) ? this.x : y;
+    this.z = (z === undefined) ? this.y : z;
   }
 
   clone() {
@@ -198,15 +193,9 @@ class Oo3DVector {
       this.y = x.y;
       this.z = x.z;
     } else {
-      if (y === undefined) {
-        this.x = x;
-        this.y = x;
-        this.z = x;
-      } else {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-      }
+      this.x = x || 0;
+      this.y = (y === undefined) ? this.x : y;
+      this.z = (z === undefined) ? this.y : z;
     }
     return this;
   }
