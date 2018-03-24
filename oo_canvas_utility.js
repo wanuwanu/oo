@@ -4,6 +4,7 @@
 var oo = oo || {};
 oo.env = oo.env || {};
 oo.env.context = null;
+oo.env.font_family = "'Hiragino Kaku Gothic ProN', 'sans-serif'";
 
 oo.blendMode = {
   kNormal: 0,
@@ -36,3 +37,29 @@ oo.localComposite = function (context, composite_operation, func) {
   context.globalCompositeOperation = co;
 };
 
+oo.drawRoundRect = function (context, x, y, w, h, radius, fill, stroke) {
+  var r = (radius === undefined) ? 5 : radius;
+  if (stroke === undefined) stroke = true;
+
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.lineTo(x + w - r, y);
+  context.quadraticCurveTo(x + w, y, x + w, y + r);
+  context.lineTo(x + w, y + h - r);
+  context.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  context.lineTo(x + r, y + h);
+  context.quadraticCurveTo(x, y + h, x, y + h - r);
+  context.lineTo(x, y + r);
+  context.quadraticCurveTo(x, y, x + r, y);
+  context.closePath();
+
+  if (fill) context.fill();
+  if (stroke) context.stroke();
+};
+
+oo.setTextAttributes = function (context, fontSize, fillStyle, textAlign, textBaseline) {
+  context.font = `${fontSize}px ` + oo.env.font_family;
+  context.fillStyle = fillStyle;
+  context.textAlign = textAlign;
+  context.textBaseline = textBaseline;
+};

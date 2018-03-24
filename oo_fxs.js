@@ -37,19 +37,19 @@ class FxsEmitterFrame {
     this.life_time = 0;
     this.life_time_dist = 0;
     this.direction_type = oo.fxsDirectionType.kNormal;
-    this.direction = new Oo2DVector(0, 0);
+    this.direction = new Oo3DVector(0, 0);
     this.direction_dist = 0;
     this.velocity0 = 0.0; // dist min
     this.velocity1 = 0.0; // dist max
     this.distribution_type = oo.fxsDistributionType.kNone;
-    this.position = new Oo2DVector(0, 0);
-    this.position_dist = new Oo2DVector(0, 0);
+    this.position = new Oo3DVector(0, 0);
+    this.position_dist = new Oo3DVector(0, 0);
     this.scale0 = 1; // dist min
     this.scale1 = 1; // dist max
     this.rotation0 = 0; // dist min
     this.rotation1 = 0; // dist max
-    this.rotation_v0 = 0; // dist min
-    this.rotation_v1 = 0; // dist max
+    this.rotate_v0 = 0; // dist min
+    this.rotate_v1 = 0; // dist max
     this.frame_offset_dist = 0;
   }
 }
@@ -155,12 +155,12 @@ class FxsParticleStatus {
   constructor() {
     this.current_frame = 0;
     this.life_time = 0;
-    this.position = new Oo2DVector(0, 0);
-    this.velocity = new Oo2DVector(0, 0);
-    this.size = new Oo2DVector(1, 1);
-    this.scale = new Oo2DVector(1, 1);
+    this.position = new Oo3DVector(0);
+    this.velocity = new Oo3DVector(0);
+    this.size = new Oo2DVector(1);
+    this.scale = new Oo2DVector(1);
     this.rotation = 0.0;
-    this.rotation_v = 0.0;
+    this.rotate_v = 0.0;
   }
 
 }
@@ -179,6 +179,7 @@ class OoFxs {
     if (ef.distribution_type === oo.fxsDistributionType.kUniform) {
       ps.position.x += ef.position_dist.x * (Math.random() * 2.0 - 1.0);
       ps.position.y += ef.position_dist.y * (Math.random() * 2.0 - 1.0);
+      ps.position.z += ef.position_dist.z * (Math.random() * 2.0 - 1.0);
     }
     if (pt.world) ps.position.add(this.position);
 
@@ -186,6 +187,7 @@ class OoFxs {
     if (ef.direction_type === oo.fxsDirectionType.kNormal) {
       ps.velocity.x = ef.direction.x * v;
       ps.velocity.y = ef.direction.y * v;
+      ps.velocity.z = ef.direction.z * v;
     }
 
     // 置き換える
@@ -195,13 +197,14 @@ class OoFxs {
       var p = Math.random() * Math.PI * 2;
       var x = r * Math.cos(p);
       var y = r * Math.sin(p);
-      return new Oo2DVector(x, y);
+      return new Oo3DVector(x, y);
     };
 
     if (ef.direction_type === oo.fxsDirectionType.kSphere) {
       var dir = getDistributionSphere();
       ps.velocity.x = dir.x * v;
       ps.velocity.y = dir.y * v;
+      ps.velocity.z = dir.z * v;
     }
 
     var s = oo.lerp(ef.scale0, ef.scale1, Math.random());
@@ -209,7 +212,7 @@ class OoFxs {
     ps.size.y = pt.size.y * s;
 
     ps.rotation = oo.lerp(ef.rotation0, ef.rotation1, Math.random());
-    ps.rotation_v = oo.lerp(ef.rotation_v0, ef.rotation_v1, Math.random());
+    ps.rotate_v = oo.lerp(ef.rotate_v0, ef.rotate_v1, Math.random());
   }
 
   update() {
@@ -220,8 +223,8 @@ class OoFxs {
     if (et.loop) es.current_frame %= et.total_frames;
     var ef = et.getFrameData(es.current_frame);
 
-    var j = 0;
-    for (var i = 0; i < es.num_particles; i++) {
+    let j = 0;
+    for (let i = 0; i < es.num_particles; i++) {
       if (es.particle_status_array[i].life_time <= 0) continue;
       if (i !== j) es.particle_status_array[j] = es.particle_status_array[i];
       j++;
@@ -230,7 +233,13 @@ class OoFxs {
 
     // パーティクル生成
     var np = es.num_particles;
-    for (i = 0; i < ef.num_ppf; i++) {
+    let ppf = ef.num_ppf;
+    if (ppf < 1.0) {
+      if (Math.random() < ppf) ppf = 1;
+    }
+    ppf = Math.floor(ppf);
+
+    for (let i = 0; i < ppf; i++) {
       if (es.num_particles >= et.max_particles) break;
       es.particle_status_array[np + i] = new FxsParticleStatus();
       this.generateParticle(es.particle_status_array[np + i], ef, es.particle_type);
@@ -238,7 +247,7 @@ class OoFxs {
     }
 
     // パーティクル移動
-    for (i = 0; i < es.num_particles; i++) {
+    for (let i = 0; i < es.num_particles; i++) {
       var ps = es.particle_status_array[i];
 
       ps.current_frame++;
@@ -247,7 +256,7 @@ class OoFxs {
       ps.life_time--;
       ps.position.add(ps.velocity);
       ps.scale.set(pf.scale);
-      ps.rotation += ps.rotation_v;
+      ps.rotation += ps.rotate_v;
     }
   }
 
@@ -256,8 +265,6 @@ class OoFxs {
     for (var i = 0; i < this.emitter_status.num_particles; i++) {
       var ps = this.emitter_status.particle_status_array[i];
       var pt = this.particle_type;
-
-      context.save();
 
       var sx = ps.size.x * ps.scale.x;
       var sy = ps.size.y * ps.scale.y;
@@ -270,14 +277,13 @@ class OoFxs {
         y += this.position.y;
       }
 
+      context.save();
       context.translate(x, y);
       context.rotate(ps.rotation * Math.PI / 180);
-
       context.drawImage(this.image,
         - sx * (0.5 + pt.center.x),
         - sy * (0.5 + pt.center.y),
         sx, sy);
-
       context.restore();
     }
   }

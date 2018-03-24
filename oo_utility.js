@@ -3,7 +3,6 @@
 
 var oo = oo || {};
 oo.env = oo.env || {};
-oo.env.font_family = "'Hiragino Kaku Gothic ProN', 'sans-serif'";
 
 oo.getArrayDiff = function (array1, array2) {
   const diff = [];
@@ -50,33 +49,6 @@ oo.appendScript = function (script_array, completion) {
 oo.getDataset = function (id, name) {
   var element = document.getElementById(id);
   if (element) return element.dataset[name];
-};
-
-oo.drawRoundRect = function (ctx, x, y, w, h, radius, fill, stroke) {
-  var r = (radius === undefined) ? 5 : radius;
-  if (stroke === undefined) stroke = true;
-
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-
-  if (fill) ctx.fill();
-  if (stroke) ctx.stroke();
-};
-
-oo.setTextAttributes = function (context, fontSize, fillStyle, textAlign, textBaseline) {
-  context.font = `${fontSize}px ` + oo.env.font_family;
-  context.fillStyle = fillStyle;
-  context.textAlign = textAlign;
-  context.textBaseline = textBaseline;
 };
 
 oo.strToInt = function (s) {

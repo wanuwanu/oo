@@ -181,7 +181,6 @@ class Oo2DVector {
 
 }
 
-
 class Oo3DVector {
   constructor(x, y, z) {
     this.x = x || 0;
