@@ -11,7 +11,7 @@ class OoGameFrame {
     this.horizontal_scaling = false;
     this.vertical_scaling = false;
     this.bottom_origin = false;
-    this.offset = new Oo2DVector(0, 0);
+    this.offset = new Oo2DVector(0);
 
     this.screen_width = 1080;
     this.screen_height = 1920;
@@ -22,9 +22,10 @@ class OoGameFrame {
     this.canvas;
     this.context;
     this.scene_array = [];
+    this.scene_map = new Map();
 
     this.click_on = false;
-    this.click_position = new Oo2DVector(0, 0);
+    this.click_position = new Oo2DVector(0);
 
     this.input = new OoGameInput();
     this.touch_on = false;
@@ -43,9 +44,10 @@ class OoGameFrame {
     return Oo2DVector.sub(this.click_position, this.offset);
   }
 
-  addGameScene(scene) {
+  addScene(scene) {
     scene.frame = this;
     this.scene_array.push(scene);
+    this.scene_map.set(scene.name, scene);
   }
 
   startScene(name) {
@@ -56,10 +58,13 @@ class OoGameFrame {
     this.setSceneStatus(name, oo.gameSceneStatus.kEnd);
   }
 
+  getScene(name) {
+    return this.scene_map.get(name);
+  }
+
   setSceneStatus(name, scene_status) {
-    for (var scene of this.scene_array) {
-      if (scene.name === name) scene.scene_status = scene_status;
-    }
+    const scene = this.getScene(name);
+    if (scene) scene.scene_status = scene_status;
   }
 
   update() {

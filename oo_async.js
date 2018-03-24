@@ -36,11 +36,11 @@ oo.serial = function (generator, completion) {
 oo.parallel = function (generator, completion) {
   var n = 0;
   function proceeder() {
-    if ((n-- === 1) && completion) completion();
+    if ((n-- === 0) && completion) completion();
   }
   var g = generator(proceeder);
   while (!g.next().done) n++;
-  if (n === 0 && completion) completion();
+  proceeder();
 };
 
 oo.createAsyncGeneratorWithList = function (async_function, list) {

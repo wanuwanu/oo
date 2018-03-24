@@ -85,7 +85,8 @@ oo.strToInt = function (s) {
 };
 
 oo.zeroPadding = function (num, length) {
-  return ('0000000000' + num).slice(-length);
+  // Number.MAX_SAFE_INTEGER = 9007199254740991
+  return ('00000000000000000000' + num).slice(- length);
 };
 
 oo.createImageFromFile = function (file) {
