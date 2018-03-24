@@ -167,7 +167,7 @@ class FxsParticleStatus {
 
 class OoFxs {
   constructor() {
-    this.position = new Oo2DVector(0, 0);
+    this.position = new Oo3DVector(0);
   }
 
   generateParticle(ps, ef, pt) {
@@ -271,10 +271,12 @@ class OoFxs {
 
       var x = ps.position.x;
       var y = ps.position.y;
+      // var z = ps.position.z;
 
       if (!pt.world) {
         x += this.position.x;
         y += this.position.y;
+        // z += this.position.z;
       }
 
       context.save();

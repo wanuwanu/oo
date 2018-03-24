@@ -118,19 +118,29 @@ class OoGameLayout {
     this.cells = [];
     this.cell_map = new Map();
     this.cell_order = [];
+
+    this.offset = new Oo2DVector(0);
+    this.context;
   }
 
-  draw(ctx, offset) {
-    var ofx = (offset === undefined) ? 0 : offset.x;
-    var ofy = (offset === undefined) ? 0 : offset.y;
+  draw(context) {
+    const ctx = context || this.context || oo.env.context;
 
     if (this.cell_order.length === 0) {
       this.cell_order = this.cells.slice();
     }
     for (var cell of this.cell_order) {
       if (!cell.rect) cell.updateRect(this);
-      if (cell.show) cell.draw(ctx, ofx, ofy);
+      if (cell.show) cell.draw(ctx, this.offset.x, this.offset.y);
     }
+  }
+
+  drawCell(name, context) {
+    const ctx = context || this.context || oo.env.context;
+
+    const cell = this.getCell(name);
+    if (!cell.rect) cell.updateRect(this);
+    cell.draw(ctx, this.offset.x, this.offset.y);
   }
 
   updateCellMap() {
@@ -150,6 +160,14 @@ class OoGameLayout {
   updateOrder() {
     this.cell_order = this.cells.slice();
     oo.sort(this.cell_order, function (a, b) { return (a.order > b.order) ? 1 : 0; });
+  }
+
+  getCell(name) {
+    return this.cell_map.get(name);
+  }
+
+  getCellImage(name) {
+    return this.cell_map.get(name).img;
   }
 
   loadJson(text) {
