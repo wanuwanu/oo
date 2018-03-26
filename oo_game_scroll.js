@@ -57,7 +57,7 @@ class OoGameScroll {
     // 離したとき
     if (!input.isTouch()) {
       // 速度減衰
-      this.velocity.mulNum(this.attenuation);
+      this.velocity.mul(this.attenuation);
       // 範囲外での追加の速度減衰
       if ((this.offset.x <= this.x_min) && (this.velocity.x < 0)) this.velocity.x *= this.attenuation_out;
       if ((this.offset.x >= this.x_max) && (this.velocity.x > 0)) this.velocity.x *= this.attenuation_out;
