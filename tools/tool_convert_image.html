@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>oo Convert Image</title>
+</head>
+
+<body>
+  <div>
+    <canvas id="canvas"></canvas>
+  </div>
+  <div>
+    <button id="clear">クリア</button>
+    <input type="file" id="load" multiple="multiple" accept="image/*">
+  </div>
+  <br>
+  <div>
+    <button id="save_png">PNGで保存</button>
+  </div>
+  <br>
+  <div>
+    <button id="save_jpg">JPGで保存</button>
+    <label>画質</label>
+    <input type="number" id="quality" style="width:50px;">
+    <label>0.0 ～ 1.0 デフォルトは0.92</label>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const images = [];
+
+      // キャンバス更新
+      const update = function () {
+        // キャンバスサイズを計算
+        const n = images.length;
+        let w = 0;
+        let h = 0;
+        for (let i = 0; i < n; i++) {
+          w += images[i].width;
+          h = Math.max(h, images[i].height);
+        }
+
+        let w2 = Math.min(w, window.innerWidth);
+        let s = w2 / w;
+
+        // キャンバスサイズを変更
+        canvas.width = w2;
+        canvas.height = h * s;
+        // 画像を描画
+        const context = canvas.getContext('2d');
+        let x = 0;
+        for (let i = 0; i < n; i++) {
+          context.drawImage(images[i], x, 0, images[i].width * s, images[i].height * s);
+          x += images[i].width * s;
+        }
+      };
+
+      const drawImage = function (i) {
+        // キャンバスサイズを変更
+        canvas.width = images[i].width;
+        canvas.height = images[i].height;
+        // 画像を描画
+        const context = canvas.getContext('2d');
+        context.drawImage(images[i], 0, 0);
+      };
+
+      // 画像のロード
+      const loadImageListener = (e) => {
+        const m = e.target.files.length;
+        const reader = [];
+        for (let i = 0; i < m; i++) {
+          reader[i] = new FileReader();
+          reader[i].onload = function () {
+            const n = images.length;
+            images[n] = new Image();
+            images[n].src = this.result;
+            images[n].filename = this.filename;
+            images[n].onload = () => { update(); };
+          };
+          reader[i].filename = e.target.files[i].name;
+          reader[i].readAsDataURL(e.target.files[i]);
+        }
+      };
+
+      // クリア
+      const button_clear = document.getElementById("clear");
+      button_clear.onclick = function () {
+        document.getElementById("load").value = '';
+        images.length = 0;
+        update();
+      };
+
+      const getNonExtension = function (filename) {
+        var pos = filename.lastIndexOf('.');
+        if (pos < 0) return filename;
+        return filename.substr(0, pos);
+      };
+
+      // png書き出し
+      const button_save_png = document.getElementById("save_png");
+      button_save_png.onclick = function () {
+        var i = 0;
+        (function saveImage() {
+          drawImage(i);
+          const canvas = document.getElementById("canvas");
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          link.download = getNonExtension(images[i].filename) + '.png';
+          link.click();
+          i++;
+          if (i < images.length) setTimeout(saveImage, 100);
+        }());
+      };
+
+      // jpg書き出し
+      const button_save_jpg = document.getElementById("save_jpg");
+      button_save_jpg.onclick = function () {
+        const quality = document.getElementById("quality").value;
+        let q = Number.parseFloat(quality);
+        if (!Number.isFinite(q)) q = 0.92; //デフォルト
+        var i = 0;
+        (function saveImage() {
+          drawImage(i);
+          const canvas = document.getElementById("canvas");
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/jpeg', q);
+          link.download = getNonExtension(images[i].filename) + '.jpg';
+          link.click();
+          i++;
+          if (i < images.length) setTimeout(saveImage, 100);
+        }());
+      };
+
+      // 画像選択ボタンのイベントリスナー登録
+      const files = document.getElementById("load");
+      files.addEventListener('change', loadImageListener, false);
+    }, false);
+  </script>
+
+</body>
+
+</html>
