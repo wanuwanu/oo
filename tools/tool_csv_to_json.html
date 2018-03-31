@@ -49,7 +49,7 @@ id,name,color
         let dq = false;
         let item = '';
         const array = [];
-        const line = [];
+        let line = [];
 
         for (let i = 0; i < n; i++) {
           const c = csv.charAt(i);
@@ -81,7 +81,7 @@ id,name,color
               }
               if (line.length) {
                 array.push(line);
-                line.length = 0;
+                line = [];
               }
               continue;
             }

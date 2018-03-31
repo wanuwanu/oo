@@ -12,17 +12,21 @@
 
 <body>
   <div>
-    <canvas id="canvas"></canvas>
+    <input type="file" id="load" multiple="multiple" accept="image/*">
   </div>
+  <br>
   <div>
     <button id="clear">クリア</button>
-    <input type="file" id="load" multiple="multiple" accept="image/*">
   </div>
   <br>
   <div>
     <label>保存画像ファイル名</label>
     <input type="text" id="save_filename">
     <button id="save">保存</button>
+  </div>
+  <br>
+  <div>
+    <canvas id="canvas"></canvas>
   </div>
 
   <script>
