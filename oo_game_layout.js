@@ -15,7 +15,6 @@ class OoGameLayoutCell {
     this.y = 0;
     this.w = 0;
     this.h = 0;
-    this.tool = false; // tool上での表示のみ
     this.border = false; // tool上での枠線表示
 
     this.text = '';
@@ -196,7 +195,6 @@ class OoGameLayout {
 
     oo.parallel(function* (p) {
       for (var cell of self.cells) {
-        if (cell['tool']) continue;
         if (cell['image']) {
           let path_name = oo.addPath(self.image_base_path, cell['image']);
           cell.img = oo.asyncCreateImage(p, path_name);
