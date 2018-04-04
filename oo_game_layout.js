@@ -171,7 +171,10 @@ class OoGameLayout {
 
   loadJson(text) {
     var obj = JSON.parse(text);
+    this.loadJsonObj(obj);
+  }
 
+  loadJsonObj(obj) {
     this.layout_name = obj.layout_name;
     this.image_base_path = obj.image_base_path;
     this.display_width = obj.display_width;
