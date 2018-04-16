@@ -3,6 +3,8 @@
 
 class OoGameButton {
   constructor(name, x, y, w, h, image) {
+    this.context = null;
+    this.show = true;
     this.name = name;
     this.enable = true;
     this.position = new Oo2DVector(x, y);
@@ -20,8 +22,15 @@ class OoGameButton {
     this.anime_effect_func = {};
     this.anime_effect_func['pop'] = this.animePop;
     this.anime_effect_func['push'] = this.animePush;
-    this.anime_effect_func['light'] = this.animeLight;
+    this.anime_effect_func['light'] = this.animeAdd;
+    this.anime_effect_func['add'] = this.animeAdd;
+    this.anime_effect_func['dark'] = this.animeMul;
+    this.anime_effect_func['mul'] = this.animeMul;
+    this.anime_effect_func['tile'] = this.animeTile;
     this.anime_effect = new Set();
+
+    this.anime_tile_effect = false;
+    this.anime_tile_alpha = 0;
   }
 
   // プリセットアニメ
@@ -36,10 +45,21 @@ class OoGameButton {
     this.anime_scale.y = Math.pow(2.0, oo.attenuatedSineWave(this.anime_counter, 0, this.anime_times, 1.5, 0.2));
   }
 
-  animeLight() {
+  animeAdd() {
     this.anime_overwrite_effect = true;
     this.blend_mode = oo.blendMode.kAdd;
     this.anime_overwrite_alpha = oo.attenuatedSineWave(this.anime_counter, 0, this.anime_times, 0.5, 0.5);
+  }
+
+  animeMul() {
+    this.anime_overwrite_effect = true;
+    this.blend_mode = oo.blendMode.kMul;
+    this.anime_overwrite_alpha = oo.attenuatedSineWave(this.anime_counter, 0, this.anime_times, 0.5, 0.5);
+  }
+
+  animeTile() {
+    this.anime_tile_effect = true;
+    this.anime_tile_alpha = oo.attenuatedSineWave(this.anime_counter, 0, this.anime_times, 0.5, 0.5);
   }
 
   isInside(position) {
@@ -50,7 +70,7 @@ class OoGameButton {
     return true;
   }
 
-  // effect_type : 'pop', 'push', 'light'
+  // effect_type : 'pop', 'push', 'light'(add), 'dark'(mul), 'tile'
   startAnime(effect_type) {
     this.anime_counter = 0;
     this.anime_effect.add(effect_type);
@@ -67,29 +87,30 @@ class OoGameButton {
         this.anime_counter = -1;
         this.anime_overwrite_effect = false;
         this.anime_overwrite_alpha = 0;
+        this.anime_tile_effect = false;
+        this.anime_tile_alpha = 0;
         this.anime_scale.set(1, 1);
       }
     }
   }
 
   draw(context) {
+    if (!this.show) return;
+
+    const ctx = context || this.context || oo.env.context;
 
     const local_draw = () => {
-      context.drawImage(
-        this.image,
-        this.position.x - this.size.x * 0.5 * this.anime_scale.x,
-        this.position.y - this.size.y * 0.5 * this.anime_scale.y,
-        this.size.x * this.anime_scale.x,
-        this.size.y * this.anime_scale.y
-      );
+      const sx = this.size.x * this.anime_scale.x;
+      const sy = this.size.y * this.anime_scale.y;
+      ctx.drawImage(this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
     };
 
     local_draw();
 
     if (this.anime_overwrite_effect) {
-      oo.localAlpha(context, this.anime_overwrite_alpha, () => {
+      oo.localAlpha(ctx, this.anime_overwrite_alpha, () => {
         const co = oo.getCompositeOperationByBlendMode(this.blend_mode);
-        oo.localComposite(context, co, () => {
+        oo.localComposite(ctx, co, () => {
           local_draw();
         });
       });
