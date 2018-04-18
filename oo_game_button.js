@@ -99,10 +99,13 @@ class OoGameButton {
 
     const ctx = context || this.context || oo.env.context;
 
+    const sx = this.size.x * this.anime_scale.x;
+    const sy = this.size.y * this.anime_scale.y;
+
     const local_draw = () => {
-      const sx = this.size.x * this.anime_scale.x;
-      const sy = this.size.y * this.anime_scale.y;
-      ctx.drawImage(this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+      if(this.image){
+        ctx.drawImage(this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+      }
     };
 
     local_draw();
@@ -115,6 +118,14 @@ class OoGameButton {
         });
       });
     }
+
+    if (this.anime_tile_effect) {
+      oo.localAlpha(ctx, this.anime_tile_alpha, () => {
+        ctx.fillStyle = this.anime_tile_color;
+        ctx.fillRect(this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+      });
+    }
+
   }
 }
 

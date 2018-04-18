@@ -2,10 +2,15 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 class OoSprite extends OoDrawObject {
-  constructor() {
+  constructor(image) {
     super();
     this.size = new Oo2DVector(1);
     this.image = null;
+
+    if (image && image instanceof Image) {
+      this.image = image;
+      this.size.set(image.width, image.height);
+    }
   }
 
   draw(context) {
