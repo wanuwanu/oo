@@ -22,8 +22,8 @@ oo.getCompositeOperationByBlendMode = function (blend_mode) {
 };
 
 oo.localAlpha = function (context, alpha, func) {
-  if(alpha === 0) return;
-  if(alpha === 1) return func();
+  if (alpha === 0) return;
+  if (alpha === 1) return func();
   const a = context.globalAlpha;
   context.globalAlpha = a * alpha;
   func();
@@ -35,6 +35,43 @@ oo.localComposite = function (context, composite_operation, func) {
   context.globalCompositeOperation = composite_operation;
   func();
   context.globalCompositeOperation = co;
+};
+
+oo.drawImage = function (context, image, x, y, w, h) {
+  if (!image) return;
+  var iw = w || image.width;
+  var ih = h || image.height;
+  context.drawImage(image, x, y, iw, ih);
+};
+
+oo.drawImageCenter = function (context, image, x, y, w, h) {
+  if (!image) return;
+  var iw = w || image.width;
+  var ih = h || image.height;
+  context.drawImage(image, x - iw * 0.5, y - ih * 0.5, iw, ih);
+};
+
+// 可変枠の描画(縦横の中心2x2ドットが可変サイズとなる中部分)
+oo.drawFrameImage = function (context, image, x, y, w, h) {
+  if (!image) return;
+  var mx = (image.width - 2) / 2;
+  var my = (image.height - 2) / 2;
+
+  var sx = [0, mx, mx + 2];
+  var sy = [0, my, my + 2];
+  var sw = [mx, 2, mx];
+  var sh = [my, 2, my];
+
+  var dx = [x, x + mx, x + w - mx];
+  var dy = [y, y + my, y + h - my];
+  var dw = [mx, w - mx * 2, mx];
+  var dh = [my, h - my * 2, my];
+
+  for (var j = 0; j < 3; j++) {
+    for (var i = 0; i < 3; i++) {
+      context.drawImage(image, sx[i], sy[j], sw[i], sh[j], dx[i], dy[j], dw[i], dh[j]);
+    }
+  }
 };
 
 oo.drawRoundRect = function (context, x, y, w, h, radius, fill, stroke) {
