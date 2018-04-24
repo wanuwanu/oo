@@ -152,43 +152,6 @@ class OoGameFrame {
     this.context.clearRect(0, 0, this.screen_width, this.screen_height);
   }
 
-  drawImage(image, x, y, w, h) {
-    if (!image) return;
-    var iw = (w === undefined) ? image.width : w;
-    var ih = (h === undefined) ? image.height : h;
-    this.context.drawImage(image, x, y, iw, ih);
-  }
-
-  drawImageCenter(image, x, y, w, h) {
-    if (!image) return;
-    var iw = (w === undefined) ? image.width : w;
-    var ih = (h === undefined) ? image.height : h;
-    this.context.drawImage(image, x - iw * 0.5, y - ih * 0.5, iw, ih);
-  }
-
-  // 可変枠の描画(縦横の中心2x2ドットが可変サイズとなる中部分)
-  drawFrameImage(image, x, y, w, h) {
-    if (!image) return;
-    var mx = (image.width - 2) / 2;
-    var my = (image.height - 2) / 2;
-
-    var sx = [0, mx, mx + 2];
-    var sy = [0, my, my + 2];
-    var sw = [mx, 2, mx];
-    var sh = [my, 2, my];
-
-    var dx = [x, x + mx, x + w - mx];
-    var dy = [y, y + my, y + h - my];
-    var dw = [mx, w - mx * 2, mx];
-    var dh = [my, h - my * 2, my];
-
-    for (var j = 0; j < 3; j++) {
-      for (var i = 0; i < 3; i++) {
-        this.context.drawImage(image, sx[i], sy[j], sw[i], sh[j], dx[i], dy[j], dw[i], dh[j]);
-      }
-    }
-  }
-
   setupInput() {
     var self = this;
     function clickListener(event) {
@@ -216,6 +179,33 @@ class OoGameFrame {
       v.y = (event.clientY - rect.top) / self.scale;
       return v;
     }
+
+    function getEventPositionTouch(event) {
+      var rect = event.target.getBoundingClientRect();
+      var v = new Oo2DVector();
+      v.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
+      v.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
+      return v;
+    }
+
+    function onTouchStart(event) {
+      self.touch_press = true;
+      self.touch_on = true;
+      self.touch_position = getEventPositionTouch(event);
+    }
+    function onTouchMove(event) {
+      // self.touch_press = true;
+      // self.touch_on = true;
+      self.touch_position = getEventPositionTouch(event);
+    }
+    function onTouchEnd(event) {
+      self.touch_press = false;
+      self.touch_position = getEventPositionTouch(event);
+    }
+
+    document.addEventListener('touchstart', onTouchStart, false);
+    document.addEventListener('touchmove', onTouchMove, false);
+    document.addEventListener('touchend', onTouchEnd, false);
 
     function onMouseDown(event) {
       self.touch_press = true;
