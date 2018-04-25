@@ -30,6 +30,7 @@ class OoGameFrame {
     this.input = new OoGameInput();
     this.touch_on = false;
     this.touch_press = false;
+    this.touch_position = new Oo2DVector(0);
 
     try {
       // window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -70,7 +71,7 @@ class OoGameFrame {
   update() {
     var status = new OoGameInputStatus();
     status.touch_press = this.touch_press || this.touch_on;
-    status.touch_position = this.touch_position;
+    status.touch_position = this.touch_position.clone();
     this.input.addStatus(status);
 
     this.touch_on = false;
@@ -183,8 +184,10 @@ class OoGameFrame {
     function getEventPositionTouch(event) {
       var rect = event.target.getBoundingClientRect();
       var v = new Oo2DVector();
-      v.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
-      v.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
+      // v.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
+      // v.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
+      v.x = (event.changedTouches[0].pageX) / self.scale;
+      v.y = (event.changedTouches[0].pageY) / self.scale;
       return v;
     }
 
@@ -194,6 +197,7 @@ class OoGameFrame {
       self.touch_position = getEventPositionTouch(event);
     }
     function onTouchMove(event) {
+      oo.test = event.changedTouches[0].pageY;
       // self.touch_press = true;
       // self.touch_on = true;
       self.touch_position = getEventPositionTouch(event);
