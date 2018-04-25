@@ -197,7 +197,6 @@ class OoGameFrame {
       self.touch_position = getEventPositionTouch(event);
     }
     function onTouchMove(event) {
-      oo.test = event.changedTouches[0].pageY;
       // self.touch_press = true;
       // self.touch_on = true;
       self.touch_position = getEventPositionTouch(event);
