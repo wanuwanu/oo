@@ -32,26 +32,25 @@ class OoGameLayoutCell {
 
   updateRect(layout) {
     if (!this.rect) {
-      this.rect = new OoRect();
-      this.rect.setXYWH(0, 0, layout.screen_width, layout.screen_height);
+      this.rect = new OoRect(0, 0, layout.screen_width, layout.screen_height);
     }
     var parent_cell = layout.cell_map.get(this.parent);
     if (parent_cell) {
       var aligned_rect = parent_cell.getAlignedRect(layout);
-      if (aligned_rect) this.rect.setRect(aligned_rect);
+      if (aligned_rect) this.rect.set(aligned_rect);
     }
   }
 
   getAlignedRect(layout) {
     if (!this.rect) this.updateRect(layout);
-    var inner_rect = oo.createOoRectWithXYWH(this.x, this.y, this.w, this.h);
-    return oo.getAlignedRect(this.rect, inner_rect, this.align);
+    var inner_rect = new OoRect(this.x, this.y, this.w, this.h);
+    return oo.alignedRect(this.rect, inner_rect, this.align);
   }
 
   getImageRect() {
     if (this.img) {
-      var image_rect = oo.createOoRectWithXYWH(this.x, this.y, this.img.width, this.img.height);
-      var r = oo.getAlignedRect(this.rect, image_rect, this.align);
+      var image_rect = new OoRect(this.x, this.y, this.img.width, this.img.height);
+      var r = oo.alignedRect(this.rect, image_rect, this.align);
       return r;
     }
   }
@@ -64,17 +63,17 @@ class OoGameLayoutCell {
     if (this.alpha < 1.0) ctx.globalAlpha = a * this.alpha;
 
     if (this.border) {
-      var inner_rect = oo.createOoRectWithXYWH(this.x, this.y, this.w, this.h);
-      var r = oo.getAlignedRect(this.rect, inner_rect, this.align);
+      var inner_rect = new OoRect(this.x, this.y, this.w, this.h);
+      var r = oo.alignedRect(this.rect, inner_rect, this.align);
       ctx.strokeStyle = this.color;
       ctx.beginPath();
-      ctx.strokeRect(r.x0 + x, r.y0 + y, r.getW(), r.getH());
+      ctx.strokeRect(r.x + x, r.y + y, r.w, r.h);
     }
 
     if (this.img && this.img.width) {
-      var image_rect = oo.createOoRectWithXYWH(this.x, this.y, this.img.width, this.img.height);
-      r = oo.getAlignedRect(this.rect, image_rect, this.align);
-      ctx.drawImage(this.img, r.x0 + x, r.y0 + y);
+      var image_rect = new OoRect(this.x, this.y, this.img.width, this.img.height);
+      r = oo.alignedRect(this.rect, image_rect, this.align);
+      ctx.drawImage(this.img, r.x + x, r.y + y);
     }
 
     if (this.text) {
@@ -90,8 +89,8 @@ class OoGameLayoutCell {
 
       var align = oo.clamp(this.align, 1, 9);
 
-      var text_rect = oo.createOoRectWithXYWH(this.x, this.y, 0, 0);
-      r = oo.getAlignedRect(this.rect, text_rect, align);
+      var text_rect = new OoRect(this.x, this.y, 0, 0);
+      r = oo.alignedRect(this.rect, text_rect, align);
 
       var text_align = ['left', 'center', 'right'];
       var text_base_line = ['top', 'middle', 'bottom'];
@@ -99,7 +98,7 @@ class OoGameLayoutCell {
       ctx.textAlign = text_align[(align + 2) % 3];
       ctx.textBaseline = text_base_line[Math.floor((align - 1) / 3)];
 
-      ctx.fillText(this.text, r.x0 + x, r.y0 + y);
+      ctx.fillText(this.text, r.x + x, r.y + y);
     }
 
     ctx.globalAlpha = a;

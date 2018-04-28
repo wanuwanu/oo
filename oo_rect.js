@@ -2,58 +2,81 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 var oo = oo || {};
+oo.env = oo.env || {};
+oo.env.default_align = 1;
 
 class OoRect {
-  constructor() {
-    this.x0 = 0;
-    this.y0 = 0;
-    this.x1 = 0;
-    this.y1 = 0;
-  }
-  setXYWH(x, y, w, h) {
-    this.x0 = x;
-    this.y0 = y;
-    this.x1 = x + w;
-    this.y1 = y + h;
-  }
-  setRect(r) {
-    this.x0 = r.x0;
-    this.y0 = r.y0;
-    this.x1 = r.x1;
-    this.y1 = r.y1;
+  constructor(x, y, w, h) {
+    this.x = x || 0;
+    this.y = y || 0;
+    this.w = w || 0;
+    this.h = h || 0;
   }
 
-  getW() { return this.x1 - this.x0; }
-  getH() { return this.y1 - this.y0; }
+  clone() {
+    return new OoRect(this.x, this.y, this.w, this.h);
+  }
 
-  isContains(position) {
-    if (position.x < this.x0 || position.x >= this.x1) return false;
-    if (position.y < this.y0 || position.y >= this.y1) return false;
+  // set(x, y, w, h)
+  // set(rect)
+  set(x, y, w, h) {
+    if (x instanceof OoRect) {
+      this.x = x.x;
+      this.y = x.y;
+      this.w = x.w;
+      this.h = x.h;
+    } else {
+      this.x = x;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+    }
+  }
+
+  // isContains(x, y)
+  // isContains(position)
+  isContains(x, y) {
+    if (x instanceof Oo2DVector) {
+      var position = x;
+      x = position.x;
+      y = position.y;
+    }
+    if (x < this.x || x >= this.x + this.w) return false;
+    if (y < this.y || y >= this.y + this.h) return false;
     return true;
+  }
+
+  alignRect(outer_rect, align) {
+    this.set(oo.alignedRect(outer_rect, this, align));
   }
 }
 
-oo.createOoRectWithXYWH = function (x, y, w, h) {
-  var rect = new OoRect();
-  rect.setXYWH(x, y ,w, h);
-  return rect;
-};
+oo.alignedRect = function (outer_rect, inner_rect, align) {
+  var r0 = outer_rect;
+  var r1 = inner_rect;
 
-oo.getAlignedRect = function (base_rect, inner_rect, align) {
-  var x = base_rect.x0;
-  var y = base_rect.y0;
-  var w = inner_rect.getW();
-  var h = inner_rect.getH();
+  var a0 = Math.floor(align / 10) % 10;
+  var a1 = align % 10;
+  if (a1 === 0) a1 = oo.env.default_align;
+  if (a0 === 0) a0 = a1;
 
-  if ((align === 1) || (align === 4) || (align === 7)) x = base_rect.x0;
-  if ((align === 2) || (align === 5) || (align === 8)) x = (base_rect.x0 + base_rect.x1 - w) / 2;
-  if ((align === 3) || (align === 6) || (align === 9)) x = base_rect.x1 - w;
-  if ((align === 1) || (align === 2) || (align === 3)) y = base_rect.y0;
-  if ((align === 4) || (align === 5) || (align === 6)) y = (base_rect.y0 + base_rect.y1 - h) / 2;
-  if ((align === 7) || (align === 8) || (align === 9)) y = base_rect.y1 - h;
+  function px(length, a) {
+    // if ((a === 1) || (a === 4) || (a === 7)) return 0;
+    // if ((a === 2) || (a === 5) || (a === 8)) return length / 2;
+    // if ((a === 3) || (a === 6) || (a === 9)) return length;
+    return length * ((a + 2) % 3) / 2;
+  }
 
-  var aligned_rect = new OoRect();
-  aligned_rect = oo.createOoRectWithXYWH(x + inner_rect.x0, y + inner_rect.y0, w, h);
-  return aligned_rect;
+  function py(length, a) {
+    // if ((a === 1) || (a === 2) || (a === 3)) return 0;
+    // if ((a === 4) || (a === 5) || (a === 6)) return length / 2;
+    // if ((a === 7) || (a === 8) || (a === 9)) return length;
+    return length * Math.floor((a - 1) / 3) / 2;
+  }
+
+  var x = r0.x + px(r0.w, a0) - px(r1.w, a1);
+  var y = r0.y + py(r0.h, a0) - py(r1.h, a1);
+
+  return new OoRect(x, y, r1.w, r1.h);
 };
 
