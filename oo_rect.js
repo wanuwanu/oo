@@ -51,6 +51,22 @@ class OoRect {
   }
 }
 
+oo.alignX = function (align, width) {
+  // if ((a === 1) || (a === 4) || (a === 7)) return 0;
+  // if ((a === 2) || (a === 5) || (a === 8)) return width / 2;
+  // if ((a === 3) || (a === 6) || (a === 9)) return width;
+  if(align === 0) align = oo.env.default_align;
+  return width * ((align + 2) % 3) / 2;
+};
+
+oo.alignY = function (align, height) {
+  // if ((a === 1) || (a === 2) || (a === 3)) return 0;
+  // if ((a === 4) || (a === 5) || (a === 6)) return height / 2;
+  // if ((a === 7) || (a === 8) || (a === 9)) return height;
+  if(align === 0) align = oo.env.default_align;
+  return height * Math.floor((align - 1) / 3) / 2;
+};
+
 oo.alignedRect = function (outer_rect, inner_rect, align) {
   var r0 = outer_rect;
   var r1 = inner_rect;
@@ -60,22 +76,8 @@ oo.alignedRect = function (outer_rect, inner_rect, align) {
   if (a1 === 0) a1 = oo.env.default_align;
   if (a0 === 0) a0 = a1;
 
-  function px(length, a) {
-    // if ((a === 1) || (a === 4) || (a === 7)) return 0;
-    // if ((a === 2) || (a === 5) || (a === 8)) return length / 2;
-    // if ((a === 3) || (a === 6) || (a === 9)) return length;
-    return length * ((a + 2) % 3) / 2;
-  }
-
-  function py(length, a) {
-    // if ((a === 1) || (a === 2) || (a === 3)) return 0;
-    // if ((a === 4) || (a === 5) || (a === 6)) return length / 2;
-    // if ((a === 7) || (a === 8) || (a === 9)) return length;
-    return length * Math.floor((a - 1) / 3) / 2;
-  }
-
-  var x = r0.x + px(r0.w, a0) - px(r1.w, a1);
-  var y = r0.y + py(r0.h, a0) - py(r1.h, a1);
+  var x = r0.x + oo.alignX(a0, r0.w) - oo.alignX(a1, r1.w);
+  var y = r0.y + oo.alignY(a0, r0.h) - oo.alignY(a1, r1.h);
 
   return new OoRect(x, y, r1.w, r1.h);
 };

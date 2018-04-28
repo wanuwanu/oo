@@ -2,29 +2,27 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 class OoTextBox extends OoDrawObject {
-  constructor(context, text, font_size, line_space, color, x, y, w, h, align) {
+  constructor(text, font_size, line_space, color, x, y, w, h, align) {
     super();
-    this.position = new Oo2DVector(x, y);
-    this.size = new Oo2DVector(w, h);
-    this.color = color || '#ffffff';
+    this.position = new Oo2DVector(x || 0, y || 0);
+    this.size = new Oo2DVector(w || 0, h || 0);
+    this.color = color || '#000000';
     this.text = text || '';
-    this.font_size = font_size || 1;
+    this.font_size = font_size || 0;
     this.line_space = line_space || 0;
     this.align = align || 0;
-    this.row = [''];
-    this.row_width = [0];
-    this.context = context || null;
-
-    const ctx = this.context || oo.env.context;
-    if (ctx) this.setText(ctx, this.text);
+    this.row = [];
+    this.row_width = [];
+    this.context = null;
   }
 
-  setText(context, text) {
+  setRect(rect) {
+    this.position = new Oo2DVector(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
+    this.size = new Oo2DVector(rect.w, rect.h);
+  }
+
+  createRow(context) {
     const ctx = context || this.context || oo.env.context;
-
-    this.text = text || '';
-
-    oo.setTextAttributes(ctx, this.font_size, this.color, 'left', 'top');
 
     this.row = [''];
 
@@ -39,6 +37,10 @@ class OoTextBox extends OoDrawObject {
     }
   }
 
+  flush() {
+    this.row = [];
+  }
+
   draw(context) {
     if (!this.show) return;
 
@@ -48,15 +50,15 @@ class OoTextBox extends OoDrawObject {
 
       oo.setTextAttributes(ctx, this.font_size, this.color, 'left', 'top');
 
-      var total_height = this.font_size * this.row.length;
-      total_height += this.line_space * (this.row.length - 1);
-      var dh = this.size.y - total_height;
+      if (this.row.length === 0) this.createRow(ctx);
 
-      var y = dh * Math.floor((this.align % 10 - 1) / 3) / 2; // see oo.alignedRect
+      var h = this.font_size * this.row.length;
+      h += this.line_space * (this.row.length - 1);
+
+      var y = oo.alignY(this.align, this.size.y - h);
 
       for (var i = 0; i < this.row.length; i++) {
-        var dw = this.size.x - this.row_width[i];
-        var x = dw * ((this.align + 2) % 3) / 2; // see oo.alignedRect
+        var x = oo.alignX(this.align, this.size.x - this.row_width[i]);
         ctx.fillText(this.row[i], this.position.x + x, this.position.y + y);
         y += this.font_size + this.line_space;
       }
