@@ -75,8 +75,8 @@ oo.drawFrameImage = function (context, image, x, y, w, h) {
 };
 
 oo.drawRoundRect = function (context, x, y, w, h, radius, fill, stroke) {
-  var r = (radius === undefined) ? 5 : radius;
-  if (stroke === undefined) stroke = true;
+  var r = (radius === void 0) ? 5 : radius;
+  if (stroke === void 0) stroke = true;
 
   context.beginPath();
   context.moveTo(x + r, y);

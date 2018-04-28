@@ -15,8 +15,9 @@ class OoRandom {
     this.y = 362436069;
     this.z = 521288629;
     this.w = 88675123;
-    if (seed !== undefined) this.seed = seed;
-    if (this.seed !== undefined) this.w = this.seed;
+
+    if (seed !== void 0) this.seed = seed;
+    if (this.seed !== void 0) this.w = this.seed;
 
     this.nd_idx = 0;
     this.nd_work = 0;

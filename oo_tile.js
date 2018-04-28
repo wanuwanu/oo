@@ -2,10 +2,10 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 class OoTile extends OoDrawObject {
-  constructor() {
+  constructor(color, width, height) {
     super();
-    this.size = new Oo2DVector(1);
-    this.color = '#ffffff';
+    this.size = new Oo2DVector(1, 1);
+    this.color = color || '#ffffff';
   }
 
   draw(context) {

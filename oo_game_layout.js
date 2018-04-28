@@ -56,8 +56,8 @@ class OoGameLayoutCell {
   }
 
   draw(ctx, ofx, ofy) {
-    var x = (ofx === undefined) ? 0 : ofx;
-    var y = (ofy === undefined) ? 0 : ofy;
+    var x = (ofx === void 0) ? 0 : ofx;
+    var y = (ofy === void 0) ? 0 : ofy;
 
     const a = ctx.globalAlpha;
     if (this.alpha < 1.0) ctx.globalAlpha = a * this.alpha;

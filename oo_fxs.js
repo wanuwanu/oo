@@ -24,9 +24,9 @@ oo.fxsDistributionType = {
 
 class OoFxsLerpParam {
   constructor(a, b, p) {
-    this.a = (a === undefined) ? 0 : a;
-    this.b = (b === undefined) ? 0 : b;
-    this.p = (p === undefined) ? 0.0 : p;
+    this.a = (a === void 0) ? 0 : a;
+    this.b = (b === void 0) ? 0 : b;
+    this.p = (p === void 0) ? 0.0 : p;
   }
 }
 
