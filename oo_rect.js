@@ -76,8 +76,8 @@ oo.alignedRect = function (outer_rect, inner_rect, align) {
   if (a1 === 0) a1 = oo.env.default_align;
   if (a0 === 0) a0 = a1;
 
-  var x = r0.x + oo.alignX(a0, r0.w) - oo.alignX(a1, r1.w);
-  var y = r0.y + oo.alignY(a0, r0.h) - oo.alignY(a1, r1.h);
+  var x = r0.x + r1.x + oo.alignX(a0, r0.w) - oo.alignX(a1, r1.w);
+  var y = r0.y + r1.y + oo.alignY(a0, r0.h) - oo.alignY(a1, r1.h);
 
   return new OoRect(x, y, r1.w, r1.h);
 };
