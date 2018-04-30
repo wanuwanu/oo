@@ -21,26 +21,24 @@ class OoRect {
   // set(rect)
   set(x, y, w, h) {
     if (x instanceof OoRect) {
-      this.x = x.x;
-      this.y = x.y;
-      this.w = x.w;
-      this.h = x.h;
+      // this.x = x.x;
+      // this.y = x.y;
+      // this.w = x.w;
+      // this.h = x.h;
+      Object.assign(this, x);
     } else {
-      this.x = x;
-      this.y = y;
-      this.w = w;
-      this.h = h;
+      // this.x = x;
+      // this.y = y;
+      // this.w = w;
+      // this.h = h;
+      Object.assign(this, { x, y, w, h });
     }
   }
 
   // isContains(x, y)
   // isContains(position)
   isContains(x, y) {
-    if (x instanceof Oo2DVector) {
-      var position = x;
-      x = position.x;
-      y = position.y;
-    }
+    if (x instanceof Oo2DVector) [x, y] = [x.x, x.y];
     if (x < this.x || x >= this.x + this.w) return false;
     if (y < this.y || y >= this.y + this.h) return false;
     return true;
@@ -55,7 +53,7 @@ oo.alignX = function (align, width) {
   // if ((a === 1) || (a === 4) || (a === 7)) return 0;
   // if ((a === 2) || (a === 5) || (a === 8)) return width / 2;
   // if ((a === 3) || (a === 6) || (a === 9)) return width;
-  if(align === 0) align = oo.env.default_align;
+  if (align === 0) align = oo.env.default_align;
   return width * ((align + 2) % 3) / 2;
 };
 
@@ -63,7 +61,7 @@ oo.alignY = function (align, height) {
   // if ((a === 1) || (a === 2) || (a === 3)) return 0;
   // if ((a === 4) || (a === 5) || (a === 6)) return height / 2;
   // if ((a === 7) || (a === 8) || (a === 9)) return height;
-  if(align === 0) align = oo.env.default_align;
+  if (align === 0) align = oo.env.default_align;
   return height * Math.floor((align - 1) / 3) / 2;
 };
 
