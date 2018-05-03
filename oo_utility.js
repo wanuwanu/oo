@@ -61,6 +61,12 @@ oo.zeroPadding = function (num, length) {
   return ('00000000000000000000' + num).slice(- length);
 };
 
+// #rrggbb形式のカラー
+oo.rgbColor = function (r, g, b) {
+  var rgb = ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+  return '#' + ('000000' + rgb.toString(16)).slice(- 6);
+};
+
 oo.createImageFromFile = function (file) {
   var img = new Image();
   img.src = file;

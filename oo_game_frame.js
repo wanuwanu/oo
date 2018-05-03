@@ -155,40 +155,36 @@ class OoGameFrame {
 
   setupInput() {
     var self = this;
+    var canvas = this.canvas;
+
     function clickListener(event) {
-      var rect = event.target.getBoundingClientRect();
+      var rect = canvas.getBoundingClientRect();
       self.click_on = true;
       self.click_position.x = (event.clientX - rect.left) / self.scale;
       self.click_position.y = (event.clientY - rect.top) / self.scale;
-      //        event.preventDefault();
     }
-    document.addEventListener('click', clickListener, false);
+    canvas.addEventListener('click', clickListener, false);
 
-    function tapListener(event) {
-      var rect = event.target.getBoundingClientRect();
-      self.click_on = true;
-      self.click_position.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
-      self.click_position.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
-      //       event.preventDefault();
-    }
-    document.addEventListener('touchend', tapListener, false);
+    // function tapListener(event) {
+    //   var rect = canvas.getBoundingClientRect();
+    //   self.click_on = true;
+    //   self.click_position.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
+    //   self.click_position.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
+    // }
+    // canvas.addEventListener('touchend', tapListener, false);
 
     function getEventPosition(event) {
-      var rect = event.target.getBoundingClientRect();
-      var v = new Oo2DVector();
-      v.x = (event.clientX - rect.left) / self.scale;
-      v.y = (event.clientY - rect.top) / self.scale;
-      return v;
+      var rect = canvas.getBoundingClientRect();
+      var x = (event.clientX - rect.left) / self.scale;
+      var y = (event.clientY - rect.top) / self.scale;
+      return new Oo2DVector(x, y);
     }
 
     function getEventPositionTouch(event) {
-      var rect = event.target.getBoundingClientRect();
-      var v = new Oo2DVector();
-      // v.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
-      // v.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
-      v.x = (event.changedTouches[0].pageX) / self.scale;
-      v.y = (event.changedTouches[0].pageY) / self.scale;
-      return v;
+      var rect = canvas.getBoundingClientRect();
+      var x = (event.changedTouches[0].pageX - rect.left) / self.scale;
+      var y = (event.changedTouches[0].pageY - rect.top) / self.scale;
+      return new Oo2DVector(x, y);
     }
 
     function onTouchStart(event) {
@@ -197,18 +193,19 @@ class OoGameFrame {
       self.touch_position = getEventPositionTouch(event);
     }
     function onTouchMove(event) {
-      // self.touch_press = true;
-      // self.touch_on = true;
       self.touch_position = getEventPositionTouch(event);
+
+      event.preventDefault();
+      event.stopPropagation();
     }
     function onTouchEnd(event) {
       self.touch_press = false;
-      self.touch_position = getEventPositionTouch(event);
+      // self.touch_position = getEventPositionTouch(event);
     }
 
-    document.addEventListener('touchstart', onTouchStart, false);
-    document.addEventListener('touchmove', onTouchMove, false);
-    document.addEventListener('touchend', onTouchEnd, false);
+    canvas.addEventListener('touchstart', onTouchStart, false);
+    canvas.addEventListener('touchmove', onTouchMove, false);
+    canvas.addEventListener('touchend', onTouchEnd, false);
 
     function onMouseDown(event) {
       self.touch_press = true;
@@ -216,8 +213,6 @@ class OoGameFrame {
       self.touch_position = getEventPosition(event);
     }
     function onMouseMove(event) {
-      //self.touch_press = true;
-      //self.touch_on = true;
       self.touch_position = getEventPosition(event);
     }
     function onMouseUp(event) {
@@ -225,9 +220,9 @@ class OoGameFrame {
       self.touch_position = getEventPosition(event);
     }
 
-    document.addEventListener('mousedown', onMouseDown, false);
-    document.addEventListener('mousemove', onMouseMove, false);
-    document.addEventListener('mouseup', onMouseUp, false);
+    canvas.addEventListener('mousedown', onMouseDown, false);
+    canvas.addEventListener('mousemove', onMouseMove, false);
+    canvas.addEventListener('mouseup', onMouseUp, false);
   }
 
 
