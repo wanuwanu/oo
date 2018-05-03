@@ -141,7 +141,7 @@ class OoGameFrame {
       canvas.style.width = canvas.width * this.scale + 'px';
       canvas.style.height = canvas.height * this.scale + 'px';
       canvas.style.position = 'absolute';
-      canvas.style.background = '#666666';
+      canvas.style.backgroundColor = '#000000';
       canvas.style.zIndex = 1;
     }
 
@@ -157,21 +157,27 @@ class OoGameFrame {
     var self = this;
     var canvas = this.canvas;
 
+    // click
     function clickListener(event) {
       var rect = canvas.getBoundingClientRect();
       self.click_on = true;
       self.click_position.x = (event.clientX - rect.left) / self.scale;
       self.click_position.y = (event.clientY - rect.top) / self.scale;
     }
-    canvas.addEventListener('click', clickListener, false);
 
-    // function tapListener(event) {
-    //   var rect = canvas.getBoundingClientRect();
-    //   self.click_on = true;
-    //   self.click_position.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
-    //   self.click_position.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
-    // }
-    // canvas.addEventListener('touchend', tapListener, false);
+    function tapListener(event) {
+      var rect = canvas.getBoundingClientRect();
+      self.click_on = true;
+      self.click_position.x = (event.changedTouches[0].pageX - rect.left) / self.scale;
+      self.click_position.y = (event.changedTouches[0].pageY - rect.top) / self.scale;
+    }
+
+    if ('ontouchstart' in window) {
+      canvas.addEventListener('touchend', tapListener, false);
+    } else {
+      canvas.addEventListener('click', clickListener, false);
+    }
+
 
     function getEventPosition(event) {
       var rect = canvas.getBoundingClientRect();
@@ -200,12 +206,8 @@ class OoGameFrame {
     }
     function onTouchEnd(event) {
       self.touch_press = false;
-      // self.touch_position = getEventPositionTouch(event);
+      self.touch_position = getEventPositionTouch(event);
     }
-
-    canvas.addEventListener('touchstart', onTouchStart, false);
-    canvas.addEventListener('touchmove', onTouchMove, false);
-    canvas.addEventListener('touchend', onTouchEnd, false);
 
     function onMouseDown(event) {
       self.touch_press = true;
@@ -220,9 +222,15 @@ class OoGameFrame {
       self.touch_position = getEventPosition(event);
     }
 
-    canvas.addEventListener('mousedown', onMouseDown, false);
-    canvas.addEventListener('mousemove', onMouseMove, false);
-    canvas.addEventListener('mouseup', onMouseUp, false);
+    if ('ontouchstart' in window) {
+      canvas.addEventListener('touchstart', onTouchStart, false);
+      canvas.addEventListener('touchmove', onTouchMove, false);
+      canvas.addEventListener('touchend', onTouchEnd, false);
+    } else {
+      canvas.addEventListener('mousedown', onMouseDown, false);
+      canvas.addEventListener('mousemove', onMouseMove, false);
+      canvas.addEventListener('mouseup', onMouseUp, false);
+    }
   }
 
 
