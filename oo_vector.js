@@ -174,6 +174,9 @@ class Oo2DVector {
     return v;
   }
 
+  static create(x, y) {
+    return new Oo2DVector(x, y);
+  }
 }
 
 class Oo3DVector {

@@ -17,6 +17,10 @@ oo.clamp = function (x, a, b) {
   return x;
 };
 
+oo.square = function (x){
+  return x * x;
+};
+
 oo.lerp = function (v0, v1, alpha) {
   return (1.0 - alpha) * v0 + alpha * v1;
 };
