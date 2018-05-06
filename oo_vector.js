@@ -88,6 +88,11 @@ class Oo2DVector {
     return this;
   }
 
+  rotate90() {
+    [this.x, this.y] = [-this.y, this.x];
+    return this;
+  }
+
   normalize() {
     var s = this.getMagnitude();
     if (s > 0.0) s = 1.0 / s;

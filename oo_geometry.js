@@ -17,7 +17,7 @@ oo.clamp = function (x, a, b) {
   return x;
 };
 
-oo.square = function (x){
+oo.square = function (x) {
   return x * x;
 };
 
@@ -72,5 +72,20 @@ oo.attenuatedSineWave = function (t, t0, t1, frequency, amplitude) {
   var x = frequency * oo.k2Pi * t / (t1 - t0);
   var y = a * Math.sin(x) * amplitude;
   return y;
+};
+
+oo.getIntersectionPoint = function (c0, r0, c1, r1) {
+  var l = Oo2DVector.distance(c0, c1);
+  if (l > r0 + r1) return;
+
+  var p = Oo2DVector.lerp(c0, c1, r0 / (r0 + r1));
+  var c0p = Oo2DVector.distance(c0, p);
+
+  var h = Math.sqrt(r0 * r0 - c0p * c0p);
+  var v = Oo2DVector.sub(c1, c0).rotate90().normalize().mul(h);
+
+  var p0 = p.clone().add(v);
+  var p1 = p.clone().sub(v);
+  return [p0, p1];
 };
 
