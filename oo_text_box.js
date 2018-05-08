@@ -4,8 +4,8 @@
 class OoTextBox extends OoDrawObject {
   constructor(text, font_size, line_space, color, x, y, w, h, align) {
     super();
-    this.position = new Oo2DVector(x || 0, y || 0);
     this.size = new Oo2DVector(w || 0, h || 0);
+    this.position = Oo2DVector.create(x || 0, y || 0).add(this.size.clone().mul(0.5));
     this.color = color || '#000000';
     this.text = text || '';
     this.font_size = font_size || 0;
@@ -47,6 +47,8 @@ class OoTextBox extends OoDrawObject {
     const ctx = context || this.context || oo.env.context;
 
     oo.localAlpha(ctx, this.alpha, () => {
+      const sx = this.size.x * this.scale.x;
+      const sy = this.size.y * this.scale.y;
 
       oo.setTextAttributes(ctx, this.font_size, this.color, 'left', 'top');
 
@@ -59,7 +61,7 @@ class OoTextBox extends OoDrawObject {
 
       for (var i = 0; i < this.row.length; i++) {
         var x = oo.alignX(this.align, this.size.x - this.row_width[i]);
-        ctx.fillText(this.row[i], this.position.x + x, this.position.y + y);
+        ctx.fillText(this.row[i], this.position.x + x - sx * 0.5, this.position.y + y - sy * 0.5);
         y += this.font_size + this.line_space;
       }
 
