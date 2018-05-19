@@ -9,7 +9,9 @@ class OoGameButton {
     this.enable = true;
     this.position = new Oo2DVector(x, y);
     this.size = new Oo2DVector(w, h);
+
     this.image = image;
+    this.patch_image = false;
 
     this.anime_times = 30;
     this.anime_counter = -1;
@@ -103,8 +105,12 @@ class OoGameButton {
     const sy = this.size.y * this.anime_scale.y;
 
     const local_draw = () => {
-      if(this.image){
-        ctx.drawImage(this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+      if (this.image) {
+        if (this.patch_image) {
+          oo.drawPatchImage(ctx, this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+        } else {
+          oo.drawImage(ctx, this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+        }
       }
     };
 
