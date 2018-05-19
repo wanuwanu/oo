@@ -24,14 +24,14 @@ oo.getCompositeOperationByBlendMode = function (blend_mode) {
 oo.localAlpha = function (context, alpha, func) {
   if (alpha === 0) return;
   if (alpha === 1) return func();
-  const a = context.globalAlpha;
+  var a = context.globalAlpha;
   context.globalAlpha = a * alpha;
   func();
   context.globalAlpha = a;
 };
 
 oo.localComposite = function (context, composite_operation, func) {
-  const co = context.globalCompositeOperation;
+  var co = context.globalCompositeOperation;
   context.globalCompositeOperation = composite_operation;
   func();
   context.globalCompositeOperation = co;

@@ -22,11 +22,9 @@ class OoGameScene {
     this.fade_alpha = 0.0;
   }
 
-  create() {
-    this.scene_end = false;
-  }
   release() { }
-
+  preload() { }
+  create() { }
   update() { }
   render() { }
 
@@ -47,9 +45,7 @@ class OoGameScene {
   }
 
   setFadeAlpha() {
-    this.fade_alpha = Math.abs(this.fade_counter / this.fade_times);
-    if (this.fade_alpha < 0.0) this.fade_alpha = 0;
-    if (this.fade_alpha > 1.0) this.fade_alpha = 1.0;
+    this.fade_alpha = oo.saturate(Math.abs(this.fade_counter / this.fade_times));
   }
 
   updateFade() {

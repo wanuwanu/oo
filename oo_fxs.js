@@ -102,7 +102,7 @@ class OoFxsTypeBase {
 }
 
 class OoFxsParticleType extends OoFxsTypeBase {
-  constructor() {
+  constructor(pt) {
     super();
     this.id = '';
     this.loop = false;
@@ -111,6 +111,8 @@ class OoFxsParticleType extends OoFxsTypeBase {
     this.center = new Oo2DVector(0, 0); // min -0.5, max 0.5
     this.texture_file = '';
     this.world = false;
+
+    if (oo.isValidObject(pt)) Object.assign(this, pt);
   }
 
   getFrameData(frame_num) {
@@ -128,13 +130,15 @@ class OoFxsParticleType extends OoFxsTypeBase {
 }
 
 class OoFxsEmitterType extends OoFxsTypeBase {
-  constructor() {
+  constructor(et) {
     super();
     this.id = '';
     this.loop = false;
     this.total_frames = 0;
     this.particle_name = '';
     this.max_particles = 0;
+
+    if (oo.isValidObject(et)) Object.assign(this, et);
   }
 }
 
@@ -230,6 +234,7 @@ class OoFxs {
       j++;
     }
     es.num_particles = j;
+    es.particle_status_array.length = j;
 
     // パーティクル生成
     var np = es.num_particles;

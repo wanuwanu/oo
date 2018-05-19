@@ -79,3 +79,14 @@ oo.arraySwap = function (array, a, b) {
   array[a] = array[b];
   array[b] = tmp;
 };
+
+oo.urlSearchParams = function (params) {
+  var map = new Map();
+  var array = params.split('&');
+  for (var item of array) {
+    var kv = item.split('=');
+    if (kv.length === 1) map.set(kv[0], '');
+    if (kv.length === 2) map.set(kv[0], kv[1]);
+  }
+  return map;
+};
