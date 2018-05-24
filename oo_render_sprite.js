@@ -29,6 +29,10 @@ class OoRenderSprite extends OoSprite {
     this.image = this.canvas;
   }
 
+  getCanvasImageData(){
+    return this.canvas_context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+  }
+
   getPixel(x, y) {
     if (!this.pixel) return;
     if (x < 0 || x >= this.size.x || y < 0 || y >= this.size.y) return;

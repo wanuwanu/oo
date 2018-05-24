@@ -226,6 +226,7 @@ class OoGameFrame {
       canvas.addEventListener('touchstart', onTouchStart, false);
       canvas.addEventListener('touchmove', onTouchMove, false);
       canvas.addEventListener('touchend', onTouchEnd, false);
+      canvas.addEventListener('touchcancel', onTouchEnd, false);
     } else {
       canvas.addEventListener('mousedown', onMouseDown, false);
       canvas.addEventListener('mousemove', onMouseMove, false);
