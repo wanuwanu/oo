@@ -26,8 +26,10 @@ oo.async = function (callback) {
 
 oo.serial = function (generator, completion) {
   function proceeder() {
-    var result = g.next();
-    if (result.done && completion) completion();
+    oo.async(() => {
+      var result = g.next();
+      if (result.done && completion) completion();
+    });
   }
   var g = generator(proceeder);
   proceeder();
@@ -36,7 +38,9 @@ oo.serial = function (generator, completion) {
 oo.parallel = function (generator, completion) {
   var n = 0;
   function proceeder() {
-    if ((n-- === 0) && completion) completion();
+    oo.async(() => {
+      if ((n-- === 0) && completion) completion();
+    });
   }
   var g = generator(proceeder);
   while (!g.next().done) n++;
