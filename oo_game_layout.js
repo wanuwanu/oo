@@ -199,7 +199,7 @@ class OoGameLayout {
       for (var cell of self.cells) {
         if (cell['image']) {
           let path_name = oo.addPath(self.image_base_path, cell['image']);
-          cell.img = oo.asyncCreateImage(p, path_name);
+          cell.img = oo.asyncCreateImage(path_name, p);
           yield;
         }
       }
@@ -210,7 +210,7 @@ class OoGameLayout {
     var self = this;
 
     oo.serial(function* (p) {
-      var obj = oo.asyncLoadText(p, layout_file);
+      var obj = oo.asyncLoadText(layout_file, p);
       yield;
       self.loadJson(obj.text);
       self.asyncLoadImage(p);

@@ -260,6 +260,36 @@ class OoGameFrame {
         self.render();
       }
     );
+
+
+    if (this.game_loop_type === 3) {
+      var time0 = Date.now();
+      var interval = 8;
+      var enter = 0;
+
+      var update = function () {
+        var time1 = Date.now();
+        var delta = time1 - time0;
+        if (delta < 1000 / fps) return;
+        time0 = time1 - Math.min(delta - 1000 / fps, interval);
+
+        if (enter) {
+          enter += 1;
+          if (enter < 60) return;
+          cancelAnimationFrame(raf);
+        }
+
+        enter = 1;
+        var raf = requestAnimationFrame(() => {
+          self.update();
+          self.render();
+          enter = 0;
+        });
+      };
+
+      setInterval(update, interval);
+    }
+
   }
 }
 

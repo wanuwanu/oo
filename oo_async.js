@@ -7,8 +7,19 @@ var oo = oo || {};
 
 oo.async = function (callback) {
   var img = new Image();
-  img.src = '';
-  img.onerror = callback;
+
+  // 動作するが、空だとパスが入ってリクエストが飛ぶ
+  // img.onerror = callback;
+  // img.src = '';
+
+  // Data URI scheme
+  // 動作するが、やや遅い
+  // img.onerror = callback;
+  // img.src = 'data:,';
+
+  // gif 1x1
+  img.onload = callback;
+  img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 };
 
 // ex.
@@ -47,51 +58,15 @@ oo.parallel = function (generator, completion) {
   proceeder();
 };
 
-oo.createAsyncGeneratorWithList = function (async_function, list) {
-  return function* (proceeder) {
-    for (var x of list) yield async_function(proceeder, x);
-  };
-};
-
-// ex.
-// var target_obj = {};
-// var list1 = [
-//   ['image_a'],
-//   ['image_b'],
-// ];
-// oo.createAsyncGeneratorWithImageList(target_obj, 'iamge', list1, 'png');
-//
-// var list2 = [
-//   ['image_a', 'image/image_a'],
-//   ['image_b', 'image/image_b'],
-// ];
-// oo.createAsyncGeneratorWithImageList(target_obj, '', list2, 'png');
-
-oo.createAsyncGeneratorWithImageList = function (target, base_path, image_list, extension) {
-  return function* (proceeder) {
-    var ext = '';
-    var path = '';
-    if (extension) ext = '.' + extension;
-    if (base_path) path = base_path + '/';
-    for (var name of image_list) {
-      if (Array.isArray(name)) {
-        yield target[name[0]] = oo.asyncCreateImage(proceeder, path + name[1] + ext);
-      } else {
-        yield target[name] = oo.asyncCreateImage(proceeder, path + name + ext);
-      }
-    }
-  };
-};
-
-oo.asyncCreateImage = function (proceeder, file) {
+oo.asyncCreateImage = function (file, proceeder) {
   var img = new Image();
-  img.src = file;
   img.onload = proceeder;
   img.onerror = proceeder;
+  img.src = file;
   return img;
 };
 
-oo.asyncAppendScript = function (proceeder, file) {
+oo.asyncAppendScript = function (file, proceeder) {
   var script = document.createElement('script');
   script.src = file;
   script.onload = proceeder;
@@ -99,32 +74,18 @@ oo.asyncAppendScript = function (proceeder, file) {
   document.body.appendChild(script);
 };
 
-oo.asyncLoadText = function (proceed, file) {
+oo.asyncLoadText = function (file, proceeder) {
   var obj = {};
   var xhr = new XMLHttpRequest();
   xhr.open('GET', file, true);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 0 || xhr.status === 200) {
-        obj['text'] = xhr.response;
-        proceed();
-      }
-    }
+  xhr.onload = () => {
+    obj['text'] = xhr.response;
+    proceeder();
   };
+  xhr.onerror = () => proceeder();
+  xhr.onabort = () => proceeder();
+  xhr.ontimeout = () => proceeder();
   xhr.send('');
   return obj;
 };
 
-
-// 通常関数のasync化
-oo.asyncFunction = function (proceeder, base_function) {
-  base_function();
-  oo.async(proceeder);
-};
-
-oo.createAsyncFunction = function (base_function) {
-  return function (proceeder) {
-    base_function();
-    oo.async(proceeder);
-  };
-};
