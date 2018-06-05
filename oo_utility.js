@@ -17,9 +17,9 @@ oo.getArrayDiff = function (array1, array2) {
 
 oo.setupLogEnv = function () {
   var div = null;
-  oo.log = function (log) {
+  oo.log = function () {
     // console
-    console.log(log);
+    console.log.apply(null, arguments);
     // dom
     if (div === null) {
       if (document.body) {
@@ -27,12 +27,25 @@ oo.setupLogEnv = function () {
         document.body.appendChild(div);
       }
     }
-    if (div) div.innerHTML += log + '<br>';
+
+    if (div) {
+      for (var arg of arguments) {
+        if (typeof arg === 'string') {
+          div.innerHTML += arg;
+        } else {
+          if (typeof arg === 'object') {
+            div.innerHTML += arg.constructor.name;
+          }
+          div.innerHTML += JSON.stringify(arg);
+        }
+      }
+      div.innerHTML += '<br>';
+    }
   };
 };
 
-oo.log = function (log) {
-  console.log(log);
+oo.log = function () {
+  console.log.apply(null, arguments);
 };
 
 oo.appendScript = function (script_array, completion) {

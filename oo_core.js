@@ -9,6 +9,14 @@ oo.isValidObject = function (object) {
   return (typeof object === 'object') && (object !== null) && !Array.isArray(object);
 };
 
+// ex.
+// oo.each(array, 'method');
+// oo.each(array, 'method', arg);
+// oo.each(array, (e, i, a) => { });
+oo.each = function (array, func, ...arg) {
+  for (var x of array) x[func].apply(x, ...arg);
+};
+
 oo.clone = function (obj) {
   return Object.assign({}, obj);
 };

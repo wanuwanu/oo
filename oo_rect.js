@@ -35,9 +35,9 @@ class OoRect {
     }
   }
 
-  // isContains(x, y)
-  // isContains(position)
-  isContains(x, y) {
+  // contains(x, y)
+  // contains(point)
+  contains(x, y) {
     if (x instanceof Oo2DVector) [x, y] = [x.x, x.y];
     if (x < this.x || x >= this.x + this.w) return false;
     if (y < this.y || y >= this.y + this.h) return false;

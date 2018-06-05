@@ -72,6 +72,14 @@ class OoGameButton {
     return true;
   }
 
+  contains(point){
+    var dx = this.position.x - point.x;
+    var dy = this.position.y - point.y;
+    if (Math.abs(dx) > this.size.x * 0.5) return false;
+    if (Math.abs(dy) > this.size.y * 0.5) return false;
+    return true;
+  }
+
   // effect_type : 'pop', 'push', 'light'(add), 'dark'(mul), 'tile'
   startAnime(effect_type) {
     this.anime_counter = 0;
