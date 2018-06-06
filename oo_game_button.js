@@ -64,15 +64,9 @@ class OoGameButton {
     this.anime_tile_alpha = oo.attenuatedSineWave(this.anime_counter, 0, this.anime_times, 0.5, 0.5);
   }
 
-  isInside(position) {
-    var dx = this.position.x - position.x;
-    var dy = this.position.y - position.y;
-    if (Math.abs(dx) > this.size.x * 0.5) return false;
-    if (Math.abs(dy) > this.size.y * 0.5) return false;
-    return true;
-  }
+  isInside(position) { return this.contains(); }
 
-  contains(point){
+  contains(point) {
     var dx = this.position.x - point.x;
     var dy = this.position.y - point.y;
     if (Math.abs(dx) > this.size.x * 0.5) return false;

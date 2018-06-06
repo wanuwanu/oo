@@ -13,8 +13,13 @@ oo.isValidObject = function (object) {
 // oo.each(array, 'method');
 // oo.each(array, 'method', arg);
 // oo.each(array, (e, i, a) => { });
-oo.each = function (array, func, ...arg) {
-  for (var x of array) x[func].apply(x, ...arg);
+oo.each = function (array, func, ...args) {
+  if (typeof func === 'string') {
+    for (var x of array) x[func].apply(x, args);
+  }
+  if (typeof func === 'function') {
+    for (var i = 0; i < array.length; i++) func.call(null, array[i], i, array);
+  }
 };
 
 oo.clone = function (obj) {
