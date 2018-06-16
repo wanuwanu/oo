@@ -23,7 +23,6 @@ oo.getCompositeOperationByBlendMode = function (blend_mode) {
 
 oo.localAlpha = function (context, alpha, func) {
   if (alpha === 0) return;
-  if (alpha === 1) return func();
   var a = context.globalAlpha;
   context.globalAlpha = a * alpha;
   func();
@@ -49,10 +48,6 @@ oo.drawImageCenter = function (context, image, x, y, w, h) {
   var iw = w || image.width;
   var ih = h || image.height;
   context.drawImage(image, x - iw * 0.5, y - ih * 0.5, iw, ih);
-};
-
-oo.drawFrameImage = function (context, image, x, y, w, h) {
-  oo.drawPatchImage(context, image, x, y, w, h);
 };
 
 // 可変枠の描画(縦横の中心2x2ドットが可変サイズとなる中部分)
