@@ -20,11 +20,10 @@ class OoTile extends OoDrawObject {
       if (this.rotation.z === 0) {
         ctx.fillRect(this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
       } else {
-        ctx.save();
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation.z);
         ctx.fillRect(- sx * 0.5, - sy * 0.5, sx, sy);
-        ctx.restore();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
     });
   }

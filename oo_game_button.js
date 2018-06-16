@@ -64,8 +64,6 @@ class OoGameButton {
     this.anime_tile_alpha = oo.attenuatedSineWave(this.anime_counter, 0, this.anime_times, 0.5, 0.5);
   }
 
-  isInside(position) { return this.contains(); }
-
   contains(point) {
     var dx = this.position.x - point.x;
     var dy = this.position.y - point.y;
@@ -98,31 +96,29 @@ class OoGameButton {
     }
   }
 
+  _drawCore(ctx) {
+    var sx = this.size.x * this.anime_scale.x;
+    var sy = this.size.y * this.anime_scale.y;
+    if (this.patch_image) {
+      oo.drawPatchImage(ctx, this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+    } else {
+      oo.drawImage(ctx, this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
+    }
+  }
+
   draw(context) {
     if (!this.show) return;
+    if (!this.image) return;
 
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
-    const sx = this.size.x * this.anime_scale.x;
-    const sy = this.size.y * this.anime_scale.y;
-
-    const local_draw = () => {
-      if (this.image) {
-        if (this.patch_image) {
-          oo.drawPatchImage(ctx, this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
-        } else {
-          oo.drawImage(ctx, this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
-        }
-      }
-    };
-
-    local_draw();
+    this._drawCore(ctx);
 
     if (this.anime_overwrite_effect) {
       oo.localAlpha(ctx, this.anime_overwrite_alpha, () => {
-        const co = oo.getCompositeOperationByBlendMode(this.blend_mode);
+        var co = oo.getCompositeOperationByBlendMode(this.blend_mode);
         oo.localComposite(ctx, co, () => {
-          local_draw();
+          this._drawCore(ctx);
         });
       });
     }
@@ -130,10 +126,11 @@ class OoGameButton {
     if (this.anime_tile_effect) {
       oo.localAlpha(ctx, this.anime_tile_alpha, () => {
         ctx.fillStyle = this.anime_tile_color;
+        var sx = this.size.x * this.anime_scale.x;
+        var sy = this.size.y * this.anime_scale.y;
         ctx.fillRect(this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
       });
     }
-
   }
 }
 

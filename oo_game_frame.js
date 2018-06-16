@@ -76,6 +76,11 @@ class OoGameFrame {
 
     this.touch_on = false;
 
+
+    // this.input.update();
+    // this.click_on = this.input.click_on;
+    // this.click_position = this.input.click_position.clone();
+
     for (var scene of this.scene_array) {
       if (scene.scene_status === oo.gameSceneStatus.kActive) scene.update();
     }
@@ -118,6 +123,10 @@ class OoGameFrame {
     var height = this.screen_height;
     if (this.horizontal_scaling) height = this.screen_width * base_h / base_w;
     if (this.vertical_scaling) width = this.screen_height * base_w / base_h;
+
+    width = Math.floor(width);
+    height = Math.floor(height);
+
     this.canvas_width = width;
     this.canvas_height = height;
     canvas.width = width;
@@ -136,10 +145,10 @@ class OoGameFrame {
       canvas = document.createElement('canvas');
       document.body.appendChild(canvas);
 
-      this.setCanvasScaleWH(canvas, window.innerWidth, window.innerHeight);
+      this.setCanvasScaleWH(canvas, document.body.clientWidth, document.body.clientHeight);
 
-      canvas.style.width = canvas.width * this.scale + 'px';
-      canvas.style.height = canvas.height * this.scale + 'px';
+      canvas.style.width = Math.floor(canvas.width * this.scale) + 'px';
+      canvas.style.height = Math.floor(canvas.height * this.scale) + 'px';
       canvas.style.position = 'absolute';
       canvas.style.backgroundColor = '#000000';
       canvas.style.zIndex = 1;
@@ -154,6 +163,9 @@ class OoGameFrame {
   }
 
   setupInput() {
+    // this.input.setup(this.canvas, 1 / this.scale);
+    // return;
+
     var self = this;
     var canvas = this.canvas;
 

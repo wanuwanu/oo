@@ -284,14 +284,13 @@ class OoFxs {
         // z += this.position.z;
       }
 
-      context.save();
       context.translate(x, y);
       context.rotate(ps.rotation * Math.PI / 180);
       context.drawImage(this.image,
         - sx * (0.5 + pt.center.x),
         - sy * (0.5 + pt.center.y),
         sx, sy);
-      context.restore();
+      context.setTransform(1, 0, 0, 1, 0, 0);
     }
   }
 }
