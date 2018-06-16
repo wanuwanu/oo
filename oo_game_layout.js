@@ -59,7 +59,7 @@ class OoGameLayoutCell {
     var x = (ofx === void 0) ? 0 : ofx;
     var y = (ofy === void 0) ? 0 : ofy;
 
-    const a = ctx.globalAlpha;
+    var a = ctx.globalAlpha;
     if (this.alpha < 1.0) ctx.globalAlpha = a * this.alpha;
 
     if (this.border) {
@@ -122,7 +122,7 @@ class OoGameLayout {
   }
 
   draw(context) {
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
     if (this.cell_order.length === 0) {
       this.cell_order = this.cells.slice();
@@ -134,9 +134,9 @@ class OoGameLayout {
   }
 
   drawCell(name, context) {
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
-    const cell = this.getCell(name);
+    var cell = this.getCell(name);
     if (!cell.rect) cell.updateRect(this);
     cell.draw(ctx, this.offset.x, this.offset.y);
   }

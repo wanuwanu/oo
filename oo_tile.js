@@ -11,11 +11,11 @@ class OoTile extends OoDrawObject {
   draw(context) {
     if (!this.show) return;
 
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
     oo.localAlpha(ctx, this.alpha, () => {
-      const sx = this.size.x * this.scale.x;
-      const sy = this.size.y * this.scale.y;
+      var sx = this.size.x * this.scale.x;
+      var sy = this.size.y * this.scale.y;
       ctx.fillStyle = this.color;
       if (this.rotation.z === 0) {
         ctx.fillRect(this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
@@ -29,7 +29,7 @@ class OoTile extends OoDrawObject {
   }
 
   static create(color, width, height) {
-    const o = new OoTile();
+    var o = new OoTile();
     o.color = color;
     o.size.set(width, height);
     return o;

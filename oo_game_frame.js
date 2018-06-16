@@ -64,7 +64,7 @@ class OoGameFrame {
   }
 
   setSceneStatus(name, scene_status) {
-    const scene = this.getScene(name);
+    var scene = this.getScene(name);
     if (scene) scene.scene_status = scene_status;
   }
 

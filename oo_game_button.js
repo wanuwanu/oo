@@ -80,7 +80,7 @@ class OoGameButton {
 
   update() {
     if (this.anime_counter >= 0) {
-      for (const name of this.anime_effect) this.anime_effect_func[name].call(this);
+      for (var name of this.anime_effect) this.anime_effect_func[name].call(this);
 
       this.anime_counter++;
       if (this.anime_counter >= this.anime_times) {

@@ -16,11 +16,11 @@ class OoSprite extends OoDrawObject {
   draw(context) {
     if (!this.show) return;
 
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
     oo.localAlpha(ctx, this.alpha, () => {
-      const sx = this.size.x * this.scale.x;
-      const sy = this.size.y * this.scale.y;
+      var sx = this.size.x * this.scale.x;
+      var sy = this.size.y * this.scale.y;
       if (this.rotation.z === 0) {
         ctx.drawImage(this.image, this.position.x - sx * 0.5, this.position.y - sy * 0.5, sx, sy);
       } else {
@@ -33,7 +33,7 @@ class OoSprite extends OoDrawObject {
   }
 
   static create(image) {
-    const o = new OoSprite();
+    var o = new OoSprite();
     if (image instanceof Image) {
       o.image = image;
       o.size.set(image.width, image.height);

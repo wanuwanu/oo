@@ -5,11 +5,11 @@ var oo = oo || {};
 oo.env = oo.env || {};
 
 oo.getArrayDiff = function (array1, array2) {
-  const diff = [];
-  for (const x of array1) {
+  var diff = [];
+  for (let x of array1) {
     if (array2.indexOf(x) === -1) diff.push(x);
   }
-  for (const x of array2) {
+  for (let x of array2) {
     if (array1.indexOf(x) === -1) diff.push(x);
   }
   return diff;
@@ -17,9 +17,9 @@ oo.getArrayDiff = function (array1, array2) {
 
 oo.setupLogEnv = function () {
   var div = null;
-  oo.log = function () {
+  oo.log = function (...args) {
     // console
-    console.log.apply(null, arguments);
+    console.log.apply(null, args);
     // dom
     if (div === null) {
       if (document.body) {
@@ -29,7 +29,7 @@ oo.setupLogEnv = function () {
     }
 
     if (div) {
-      for (var arg of arguments) {
+      for (var arg of args) {
         if (typeof arg === 'string') {
           div.innerHTML += arg;
         } else {
@@ -44,8 +44,8 @@ oo.setupLogEnv = function () {
   };
 };
 
-oo.log = function () {
-  console.log.apply(null, arguments);
+oo.log = function (...args) {
+  console.log.apply(null, args);
 };
 
 oo.appendScript = function (script_array, completion) {

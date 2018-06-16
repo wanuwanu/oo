@@ -22,7 +22,7 @@ class OoTextBox extends OoDrawObject {
   }
 
   createRow(context) {
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
     this.row = [''];
 
@@ -44,11 +44,11 @@ class OoTextBox extends OoDrawObject {
   draw(context) {
     if (!this.show) return;
 
-    const ctx = context || this.context || oo.env.context;
+    var ctx = context || this.context || oo.env.context;
 
     oo.localAlpha(ctx, this.alpha, () => {
-      const sx = this.size.x * this.scale.x;
-      const sy = this.size.y * this.scale.y;
+      var sx = this.size.x * this.scale.x;
+      var sy = this.size.y * this.scale.y;
 
       oo.setTextAttributes(ctx, this.font_size, this.color, 'left', 'top');
 

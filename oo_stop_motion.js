@@ -16,13 +16,13 @@ class OoStopMotion {
   }
 
   asyncLoadImage(proceeder) {
-    const n = this.image_files.length;
+    var n = this.image_files.length;
     this.total_frames = n;
 
-    const self = this;
+    var self = this;
     oo.parallel(function* (p) {
       for (let i = 0; i < n; i++) {
-        const path_name = oo.addPath(self.image_base_path, self.image_files[i]);
+        var path_name = oo.addPath(self.image_base_path, self.image_files[i]);
         self.images[i] = oo.asyncCreateImage(path_name, p);
         yield;
       }
@@ -37,7 +37,7 @@ class OoStopMotion {
   }
 
   updateByTime() {
-    const time1 = (new Date()).getTime();
+    var time1 = (new Date()).getTime();
     this.elapsed_time += time1 - this.time0;
     this.time0 = time1;
     this.current_frame = Math.floor((this.elapsed_time * this.fps) / 1000);
@@ -49,8 +49,8 @@ class OoStopMotion {
   }
 
   draw(context) {
-    const frame = oo.clamp(this.current_frame, 0, this.images.length - 1);
-    const image = this.images[frame];
+    var frame = oo.clamp(this.current_frame, 0, this.images.length - 1);
+    var image = this.images[frame];
     context.drawImage(image, this.position.x, this.position.y);
   }
 }
