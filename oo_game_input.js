@@ -71,6 +71,7 @@ class OoGameInput {
     // this.status_array.pop();
     // this.status_array.unshift(status);
 
+  
     this.click_on = this._click_on;
     this.click_position = this._click_position.clone();
 
