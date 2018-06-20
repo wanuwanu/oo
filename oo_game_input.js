@@ -5,6 +5,7 @@ class OoGameInputStatus {
   constructor() {
     this.touch_press = false;
     this.touch_position = new Oo2DVector(0, 0);
+    this.touch_delta = new Oo2DVector(0, 0);
   }
 }
 
@@ -34,6 +35,7 @@ class OoGameInput {
   }
 
   getTouchPosition() { return this.status_array[0].touch_position; }
+  getTouchDelta() { return this.status_array[0].touch_delta; }
 
   isTouch() { return this.status_array[0].touch_press === true; }
   isTouchStart() { return (this.status_array[0].touch_press === true && this.status_array[1].touch_press === false); }
@@ -90,7 +92,7 @@ class OoGameInput {
     // return Oo2DVector.create(x, y).mul(this._scale);
     var x = (event.changedTouches[0].pageX - r.left) * this._scale;
     var y = (event.changedTouches[0].pageY - r.top) * this._scale;
-    return  new Oo2DVector(x, y);
+    return new Oo2DVector(x, y);
   }
 
   _clickListener(event) {
