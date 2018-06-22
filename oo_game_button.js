@@ -108,19 +108,19 @@ class OoGameButton {
 
   draw(context) {
     if (!this.show) return;
-    if (!this.image) return;
 
     var ctx = context || this.context || oo.env.context;
 
-    this._drawCore(ctx);
-
-    if (this.anime_overwrite_effect) {
-      oo.localAlpha(ctx, this.anime_overwrite_alpha, () => {
-        var co = oo.getCompositeOperationByBlendMode(this.blend_mode);
-        oo.localComposite(ctx, co, () => {
-          this._drawCore(ctx);
+    if (this.image) {
+      this._drawCore(ctx);
+      if (this.anime_overwrite_effect) {
+        oo.localAlpha(ctx, this.anime_overwrite_alpha, () => {
+          var co = oo.getCompositeOperationByBlendMode(this.blend_mode);
+          oo.localComposite(ctx, co, () => {
+            this._drawCore(ctx);
+          });
         });
-      });
+      }
     }
 
     if (this.anime_tile_effect) {
