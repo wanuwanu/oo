@@ -6,9 +6,9 @@
 var oo = oo || {};
 
 oo.async = function (callback) {
-  setTimeout(callback, 0);
+  // setTimeout(callback, 0);
 
-  // var img = new Image();
+  var img = new Image();
 
   // 動作するが、空だとパスが入ってリクエストが飛ぶ
   // img.onerror = callback;
@@ -20,8 +20,8 @@ oo.async = function (callback) {
   // img.src = 'data:,';
 
   // gif 1x1
-  // img.onload = callback;
-  // img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+  img.onload = callback;
+  img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 };
 
 // ex.
