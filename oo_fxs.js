@@ -267,6 +267,8 @@ class OoFxs {
 
   draw(context) {
 
+    context.save();
+
     for (var i = 0; i < this.emitter_status.num_particles; i++) {
       var ps = this.emitter_status.particle_status_array[i];
       var pt = this.particle_type;
@@ -284,13 +286,15 @@ class OoFxs {
         // z += this.position.z;
       }
 
+      context.setTransform(1, 0, 0, 1, 0, 0);
       context.translate(x, y);
       context.rotate(ps.rotation * Math.PI / 180);
       context.drawImage(this.image,
         - sx * (0.5 + pt.center.x),
         - sy * (0.5 + pt.center.y),
         sx, sy);
-      context.setTransform(1, 0, 0, 1, 0, 0);
     }
+
+    context.restore();
   }
 }
