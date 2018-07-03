@@ -2,6 +2,8 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 var oo = oo || {};
+oo.env = oo.env || {};
+oo.env.os = '';
 
 class OoGameFrame {
   constructor() {
@@ -10,13 +12,9 @@ class OoGameFrame {
 
     this.horizontal_scaling = false;
     this.vertical_scaling = false;
-    this.bottom_origin = false;
-    this.offset = new Oo2DVector(0);
 
     this.screen_width = 1080;
     this.screen_height = 1920;
-    this.canvas_width = this.screen_width;
-    this.canvas_height = this.screen_height;
     this.scale = 1;
 
     this.canvas;
@@ -31,6 +29,7 @@ class OoGameFrame {
     this.touch_on = false;
     this.touch_press = false;
     this.touch_position = new Oo2DVector(0);
+    this.touch_delta = new Oo2DVector(0);
 
     try {
       // window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -39,10 +38,6 @@ class OoGameFrame {
     catch (e) {
       console.log('oo:new AudioContext() exception');
     }
-  }
-
-  getOffsetClickPosition() {
-    return Oo2DVector.sub(this.click_position, this.offset);
   }
 
   addScene(scene) {
@@ -75,7 +70,7 @@ class OoGameFrame {
     this.input.addStatus(status);
 
     this.touch_on = false;
-
+    this.touch_delta = new Oo2DVector(0);
 
     // this.input.update();
     // this.click_on = this.input.click_on;
@@ -109,7 +104,6 @@ class OoGameFrame {
 
   setHorizontalScaling() { this.horizontal_scaling = true; }
   setVerticalScaling() { this.vertical_scaling = true; }
-  setBottomOrigin() { this.bottom_origin = true; }
 
   setCanvasScaleWH(canvas, base_w, base_h) {
     // 矩形内最大サイズのスケール
@@ -121,18 +115,10 @@ class OoGameFrame {
     // サイズ
     var width = this.screen_width;
     var height = this.screen_height;
-    if (this.horizontal_scaling) height = this.screen_width * base_h / base_w;
-    if (this.vertical_scaling) width = this.screen_height * base_w / base_h;
-
-    width = Math.floor(width);
-    height = Math.floor(height);
-
-    this.canvas_width = width;
-    this.canvas_height = height;
+    if (this.horizontal_scaling) height = Math.floor(this.screen_width * base_h / base_w);
+    if (this.vertical_scaling) width = Math.floor(this.screen_height * base_w / base_h);
     canvas.width = width;
     canvas.height = height;
-    // 下を基準とする場合のオフセット
-    if (this.bottom_origin) this.offset.y = height - this.screen_height;
   }
 
   createDrawEnv(canvas) {
@@ -159,7 +145,11 @@ class OoGameFrame {
   }
 
   clear() {
-    this.context.clearRect(0, 0, this.screen_width, this.screen_height);
+    if(oo.env.os === 'android'){
+      this.context.clearRect(0, 0, this.canvas.width + 1, this.canvas.height + 1);
+    }else{
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
   }
 
   setupInput() {
@@ -206,19 +196,42 @@ class OoGameFrame {
     }
 
     function onTouchStart(event) {
-      self.touch_press = true;
-      self.touch_on = true;
-      self.touch_position = getEventPositionTouch(event);
-    }
-    function onTouchMove(event) {
-      self.touch_position = getEventPositionTouch(event);
-
       event.preventDefault();
       event.stopPropagation();
+
+      if (event.touches.length === 1) {
+        self.touch_press = true;
+        self.touch_on = true;
+        self.touch_position = getEventPositionTouch(event);
+        self.touch_delta.set(0, 0);
+      } else {
+        self.touch_press = false;
+      }
     }
+
+    function onTouchMove(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (self.touch_position.x < 0) self.touch_press = false;
+      if (self.touch_position.y < 0) self.touch_press = false;
+
+      if (self.touch_press) {
+        var position = getEventPositionTouch(event);
+        self.touch_delta.add(position).sub(self.touch_position);
+        self.touch_position = position;
+      }
+    }
+
     function onTouchEnd(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (self.touch_press) {
+        self.touch_position = getEventPositionTouch(event);
+      }
+
       self.touch_press = false;
-      self.touch_position = getEventPositionTouch(event);
     }
 
     function onMouseDown(event) {
@@ -226,9 +239,13 @@ class OoGameFrame {
       self.touch_on = true;
       self.touch_position = getEventPosition(event);
     }
+
     function onMouseMove(event) {
-      self.touch_position = getEventPosition(event);
+      var position = getEventPosition(event);
+      self.touch_delta.add(position).sub(self.touch_position);
+      self.touch_position = position;
     }
+
     function onMouseUp(event) {
       self.touch_press = false;
       self.touch_position = getEventPosition(event);

@@ -65,7 +65,13 @@ oo.getDataset = function (id, name) {
 };
 
 oo.strToInt = function (s) {
-  var n = Number.parseInt(s);
+  // forbid octal integer
+  var n = 0;
+  if(s.substr(0, 2) === '0x' || s.substr(0, 2) === '0X'){
+    n = Number.parseInt(s, 16);
+  } else {
+    n = Number.parseInt(s, 10);
+  }
   return (Number.isInteger(n)) ? n : 0;
 };
 
