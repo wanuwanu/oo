@@ -31,6 +31,27 @@
   </div>
   <br>
   <div>
+    <label>スケール指定</label>
+    <input type="number" id="scale" style="width:50px;">
+    <label>0.0 ～ デフォルトは1.0</label>
+  </div>
+  <br>
+  <div>
+    <label>領域指定</label>
+    <label>x</label>
+    <input type="number" id="ix" style="width:50px;">
+    <label>y</label>
+    <input type="number" id="iy" style="width:50px;">
+    <label>w</label>
+    <input type="number" id="iw" style="width:50px;">
+    <label>h</label>
+    <input type="number" id="ih" style="width:50px;">
+    <br>
+    <label>デフォルトは各画像の(0, 0, width * scale, height * scale)</label>
+  </div>
+
+  <br>
+  <div>
     <canvas id="canvas"></canvas>
   </div>
 
@@ -64,13 +85,19 @@
         }
       };
 
-      const drawImage = function (i) {
+      const drawImage = function (i, param) {
         // キャンバスサイズを変更
-        canvas.width = images[i].width;
-        canvas.height = images[i].height;
+        var s = param.scale;
+        var w = images[i].width * s;
+        var h = images[i].height * s;
+        if (param.w) w = param.w;
+        if (param.h) h = param.h;
+        canvas.width = w;
+        canvas.height = h;
         // 画像を描画
         const context = canvas.getContext('2d');
-        context.drawImage(images[i], 0, 0);
+        context.drawImage(images[i], 0, 0, images[i].width, images[i].height, 
+        - param.x, - param.y, images[i].width * s, images[i].height * s);
       };
 
       // 画像のロード
@@ -105,12 +132,39 @@
         return filename.substr(0, pos);
       };
 
+      var getValueF = function (name, default_value) {
+        var v = document.getElementById(name).value;
+        var f = Number.parseFloat(v);
+        if (!Number.isFinite(f)) f = default_value;
+        return f;
+      };
+
+      var getValueI = function (name, default_value) {
+        var v = document.getElementById(name).value;
+        var i = Number.parseInt(v);
+        if (!Number.isInteger(i)) i = default_value;
+        return i;
+      };
+
+      var getParam = function () {
+        var scale = getValueF('scale', 1.0);
+        var x = getValueI('ix', 0);
+        var y = getValueI('iy', 0);
+        var w = getValueI('iw', 0);
+        var h = getValueI('ih', 0);
+        return { x, y, w, h, scale };
+      }
+
       // png書き出し
       const button_save_png = document.getElementById("save_png");
       button_save_png.onclick = function () {
+        const scale = document.getElementById("scale").value;
+        let s = Number.parseFloat(scale);
+        if (!Number.isFinite(s)) s = 1.0; //デフォルト
+
         var i = 0;
         (function saveImage() {
-          drawImage(i);
+          drawImage(i, getParam());
           const canvas = document.getElementById("canvas");
           const link = document.createElement('a');
           link.href = canvas.toDataURL('image/png');
@@ -124,12 +178,20 @@
       // jpg書き出し
       const button_save_jpg = document.getElementById("save_jpg");
       button_save_jpg.onclick = function () {
-        const quality = document.getElementById("quality").value;
-        let q = Number.parseFloat(quality);
-        if (!Number.isFinite(q)) q = 0.92; //デフォルト
+
+        // const scale = document.getElementById("scale").value;
+        // let s = Number.parseFloat(scale);
+        // if (!Number.isFinite(s)) s = 1.0; //デフォルト
+
+        // const quality = document.getElementById("quality").value;
+        // let q = Number.parseFloat(quality);
+        // if (!Number.isFinite(q)) q = 0.92; //デフォルト
+
+        var q = getValueF('quality', 0.92);
+
         var i = 0;
         (function saveImage() {
-          drawImage(i);
+          drawImage(i, getParam());
           const canvas = document.getElementById("canvas");
           const link = document.createElement('a');
           link.href = canvas.toDataURL('image/jpeg', q);

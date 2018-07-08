@@ -18,7 +18,7 @@ oo.each = function (array, func, ...args) {
     for (var x of array) x[func].apply(x, args);
   }
   if (typeof func === 'function') {
-    for (var i = 0; i < array.length; i++) func.call(null, array[i], i, array);
+    for (var i = 0; i < array.length; i++) func.call({}, array[i], i, array);
   }
 };
 

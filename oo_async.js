@@ -21,9 +21,13 @@ oo.async = function (callback) {
 
   // gif 1x1
   img.onload = callback;
+  img.onerror = callback;
   img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 };
 
+
+// oo.serial oo.parallel
+//
 // ex.
 // oo.serial(function* (proceeder) {
 //   yield asyncFunction1(proceeder);
@@ -36,7 +40,7 @@ oo.async = function (callback) {
 //   yield asyncFunction2(proceeder);
 // }, () => {
 // });
-
+//
 oo.serial = function (generator, completion) {
   function proceeder() {
     oo.async(() => {
@@ -77,17 +81,50 @@ oo.asyncAppendScript = function (file, proceeder) {
 };
 
 oo.asyncLoadText = function (file, proceeder) {
-  var obj = {};
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', file, true);
-  xhr.onload = () => {
-    obj['text'] = xhr.response;
-    proceeder();
-  };
-  xhr.onerror = () => proceeder();
-  xhr.onabort = () => proceeder();
-  xhr.ontimeout = () => proceeder();
-  xhr.send('');
+  return oo.ajax('GET', file, null, null, proceeder);
+};
+
+
+// send_objをJSONにして送り、
+// 受け取ったJSONをrecv_objにセットする
+oo.ajaxJson = function (method, url, send_obj, recv_obj, callback) {
+  var json = JSON.stringify(send_obj);
+  var obj = oo.ajax(method, url, json, 'application/json', () => {
+    if (obj.status === 'ok') {
+      Object.assign(recv_obj, JSON.parse(obj.text));
+    }
+    callback();
+  });
   return obj;
 };
 
+// method 'GET' or 'POST'
+// content_type 'application/json', 'application/x-www-form-urlencoded', ...
+oo.ajax = function (method, url, data, content_type, callback) {
+  var obj = {};
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url, true);
+
+  xhr.onload = () => {
+    obj.text = xhr.responseText;
+    obj.status = 'ok';
+    callback();
+  };
+
+  xhr.onerror = () => {
+    obj.status = 'error';
+    callback();
+  };
+
+  xhr.onabort = xhr.onerror;
+  xhr.ontimeout = xhr.onerror;
+
+  if (method === 'POST') {
+    xhr.setRequestHeader('Content-Type', content_type);
+    xhr.send(data);
+  }
+  if (method === 'GET') {
+    xhr.send(null);
+  }
+  return obj;
+};

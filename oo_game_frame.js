@@ -145,9 +145,9 @@ class OoGameFrame {
   }
 
   clear() {
-    if(oo.env.os === 'android'){
+    if (oo.env.os === 'android') {
       this.context.clearRect(0, 0, this.canvas.width + 1, this.canvas.height + 1);
-    }else{
+    } else {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
@@ -213,13 +213,15 @@ class OoGameFrame {
       event.preventDefault();
       event.stopPropagation();
 
-      if (self.touch_position.x < 0) self.touch_press = false;
-      if (self.touch_position.y < 0) self.touch_press = false;
-
       if (self.touch_press) {
         var position = getEventPositionTouch(event);
         self.touch_delta.add(position).sub(self.touch_position);
         self.touch_position = position;
+
+        if (position.x < 0) self.touch_press = false;
+        if (position.y < 0) self.touch_press = false;
+        if (position.x >= canvas.width) self.touch_press = false;
+        if (position.y >= canvas.height) self.touch_press = false;
       }
     }
 
