@@ -1,30 +1,6 @@
 // OoLibrary Copyright (c) wanu@nyagoya
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
-class OoVector {
-  constructor() { }
-
-  static add(v0, v1) {
-    return v0.clone().add(v1);
-  }
-
-  static sub(v0, v1) {
-    return v0.clone().sub(v1);
-  }
-
-  static mul(v0, v1) {
-    return v0.clone().mul(v1);
-  }
-
-  static div(v0, v1) {
-    return v0.clone().div(v1);
-  }
-
-  static distance2(v0, v1) {
-    return v0.clone().sub(v1).getMagnitude();
-  }
-}
-
 class Oo2DVector {
   constructor(x, y) {
     this.x = x || 0;
@@ -239,10 +215,22 @@ class Oo3DVector {
     return this;
   }
 
-  add(v) {
-    this.x += (oo.isObject(v) ? v.x : v) || 0;
-    this.y += (oo.isObject(v) ? v.y : v) || 0;
-    this.z += (oo.isObject(v) ? v.z : v) || 0;
+  add(v, s) {
+    if (oo.isObject(v)) {
+      if (s !== void 0) {
+        this.x += (v.x || 0) * s;
+        this.y += (v.y || 0) * s;
+        this.z += (v.z || 0) * s;
+      } else {
+        this.x += v.x || 0;
+        this.y += v.y || 0;
+        this.z += v.z || 0;
+      }
+    } else {
+      this.x += v || 0;
+      this.y += v || 0;
+      this.z += v || 0;
+    }
     return this;
   }
 
@@ -342,6 +330,22 @@ class Oo3DVector {
     return Math.atan2(this.y, this.x) * 180.0 / Math.PI;
   }
 
+  static add(v0, v1) {
+    return v0.clone().add(v1);
+  }
+
+  static sub(v0, v1) {
+    return v0.clone().sub(v1);
+  }
+
+  static mul(v0, v1) {
+    return v0.clone().mul(v1);
+  }
+
+  static div(v0, v1) {
+    return v0.clone().div(v1);
+  }
+
   static angle(v0, v1) {
     return Math.acos(Oo3DVector.dot(v1, v0) / (v1.getMagnitude() * v0.getMagnitude()));
   }
@@ -379,10 +383,11 @@ class Oo3DVector {
     var k2 = 3.0 * s * t * t;
     var k3 = t * t * t;
 
-    var v = v0.clone().mul(k0);
-    v.add(v1.clone().mul(k1));
-    v.add(v2.clone().mul(k2));
-    v.add(v3.clone().mul(k3));
+    var v = new Oo3DVector(0, 0, 0);
+    v.add(v0, k0);
+    v.add(v1, k1);
+    v.add(v2, k2);
+    v.add(v3, k3);
     return v;
   }
 
