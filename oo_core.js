@@ -5,9 +5,8 @@ var oo = oo || {};
 oo.env = oo.env || {};
 oo.env.debug_log = false;
 
-oo.isValidObject = function (object) {
-  return (typeof object === 'object') && (object !== null) && !Array.isArray(object);
-};
+oo.qq = function (v, value) { return (v !== void 0) ? v : value; };
+oo.isObject = function (obj) { return (typeof obj === 'object') && (obj !== null) && !Array.isArray(obj); };
 
 // ex.
 // oo.each(array, 'method');
@@ -20,6 +19,14 @@ oo.each = function (array, func, ...args) {
   if (typeof func === 'function') {
     for (var i = 0; i < array.length; i++) func.call({}, array[i], i, array);
   }
+};
+
+oo.repeat = function (n, func) {
+  for (var i = 0; i < n; i++) func(i);
+};
+
+oo.repeat2 = function (n, work, func) {
+  for (var i = 0; i < n; i++) func(i, work);
 };
 
 oo.clone = function (obj) {
@@ -68,10 +75,10 @@ oo.setupQuery = function () {
       if (typeof args !== 'undefined') {
         if (typeof args === 'string') {
           if (args) $elements[element.id = args] = element;
-          if (oo.isValidObject(style)) Object.assign(element.style, style);
+          if (oo.isObject(style)) Object.assign(element.style, style);
         } else {
-          if (oo.isValidObject(args.property)) Object.assign(element, args.property);
-          if (oo.isValidObject(args.style)) Object.assign(element.style, args.style);
+          if (oo.isObject(args.property)) Object.assign(element, args.property);
+          if (oo.isObject(args.style)) Object.assign(element.style, args.style);
           if (element.id) $elements[element.id] = element;
         }
       }

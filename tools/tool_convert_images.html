@@ -60,54 +60,36 @@
       const images = [];
 
       // キャンバス更新
-      const update = function () {
-        // キャンバスサイズを計算
-        const n = images.length;
-        let w = 0;
-        let h = 0;
-        for (let i = 0; i < n; i++) {
-          w += images[i].width;
-          h = Math.max(h, images[i].height);
+      var update = function () {
+        var total_width = 0;
+        var max_height = 0;
+        for (var img of images) {
+          total_width += img.width;
+          max_height = Math.max(max_height, img.height);
         }
-
-        let w2 = Math.min(w, window.innerWidth);
-        let s = w2 / w;
-
+        // 描画スケールを求める
+        var cw = Math.min(total_width, window.innerWidth);
+        var s = cw / total_width;
         // キャンバスサイズを変更
-        canvas.width = w2;
-        canvas.height = h * s;
+        canvas.width = cw;
+        canvas.height = max_height * s;
         // 画像を描画
-        const context = canvas.getContext('2d');
-        let x = 0;
-        for (let i = 0; i < n; i++) {
-          context.drawImage(images[i], x, 0, images[i].width * s, images[i].height * s);
-          x += images[i].width * s;
+        var ctx = canvas.getContext('2d');
+        var x = 0;
+        for (var img of images) {
+          ctx.drawImage(img, x, 0, img.width * s, img.height * s);
+          x += img.width * s;
         }
-      };
-
-      const drawImage = function (i, param) {
-        // キャンバスサイズを変更
-        var s = param.scale;
-        var w = images[i].width * s;
-        var h = images[i].height * s;
-        if (param.w) w = param.w;
-        if (param.h) h = param.h;
-        canvas.width = w;
-        canvas.height = h;
-        // 画像を描画
-        const context = canvas.getContext('2d');
-        context.drawImage(images[i], 0, 0, images[i].width, images[i].height, 
-        - param.x, - param.y, images[i].width * s, images[i].height * s);
       };
 
       // 画像のロード
-      const loadImageListener = (e) => {
-        const m = e.target.files.length;
-        const reader = [];
+      var loadImageListener = (e) => {
+        var m = e.target.files.length;
+        var reader = [];
         for (let i = 0; i < m; i++) {
           reader[i] = new FileReader();
           reader[i].onload = function () {
-            const n = images.length;
+            var n = images.length;
             images[n] = new Image();
             images[n].src = this.result;
             images[n].filename = this.filename;
@@ -146,60 +128,61 @@
         return i;
       };
 
-      var getParam = function () {
+      // 画像内の矩形サイズでcanvasをリサイズして描画
+      // rect: { x, y, w, h }
+      var resizeCanvasDrawImage = function (canvas_name, image, rect, scale) {
+        var canvas = document.getElementById(canvas_name);
+        canvas.width = rect.w * scale;
+        canvas.height = rect.h * scale;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w * scale, rect.h * scale);
+      };
+
+      // ext 'jpg' || ' png'
+      var saveCanvasImage = function (canvas_name, file_name, ext, quality) {
+        var canvas = document.getElementById(canvas_name);
+        var link = document.createElement('a');
+        if (ext === 'jpg') link.href = canvas.toDataURL('image/jpeg', quality);
+        if (ext === 'png') link.href = canvas.toDataURL('image/png');
+        link.download = file_name + '.' + ext;
+        link.click();
+      };
+
+      var convertImages = function (images, saveProc) {
         var scale = getValueF('scale', 1.0);
-        var x = getValueI('ix', 0);
-        var y = getValueI('iy', 0);
-        var w = getValueI('iw', 0);
-        var h = getValueI('ih', 0);
-        return { x, y, w, h, scale };
-      }
+        function* gen(p) {
+          for (var img of images) {
+            var x = getValueI('ix', 0);
+            var y = getValueI('iy', 0);
+            var w = getValueI('iw', 0) || img.width;
+            var h = getValueI('ih', 0) || img.height;
+            saveProc(img, { x, y, w, h }, scale);
+            yield p();
+          }
+        }
+        var g = gen(() => { setTimeout(() => { g.next(); }, 100); });
+        g.next();
+      };
 
       // png書き出し
       const button_save_png = document.getElementById("save_png");
       button_save_png.onclick = function () {
-        const scale = document.getElementById("scale").value;
-        let s = Number.parseFloat(scale);
-        if (!Number.isFinite(s)) s = 1.0; //デフォルト
-
-        var i = 0;
-        (function saveImage() {
-          drawImage(i, getParam());
-          const canvas = document.getElementById("canvas");
-          const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
-          link.download = getNonExtension(images[i].filename) + '.png';
-          link.click();
-          i++;
-          if (i < images.length) setTimeout(saveImage, 100);
-        }());
+        var saveImage = function (img, rect, scale) {
+          resizeCanvasDrawImage('canvas', img, rect, scale);
+          saveCanvasImage('canvas', getNonExtension(img.filename), 'png');
+        };
+        convertImages(images, saveImage);
       };
 
       // jpg書き出し
       const button_save_jpg = document.getElementById("save_jpg");
       button_save_jpg.onclick = function () {
-
-        // const scale = document.getElementById("scale").value;
-        // let s = Number.parseFloat(scale);
-        // if (!Number.isFinite(s)) s = 1.0; //デフォルト
-
-        // const quality = document.getElementById("quality").value;
-        // let q = Number.parseFloat(quality);
-        // if (!Number.isFinite(q)) q = 0.92; //デフォルト
-
         var q = getValueF('quality', 0.92);
-
-        var i = 0;
-        (function saveImage() {
-          drawImage(i, getParam());
-          const canvas = document.getElementById("canvas");
-          const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/jpeg', q);
-          link.download = getNonExtension(images[i].filename) + '.jpg';
-          link.click();
-          i++;
-          if (i < images.length) setTimeout(saveImage, 100);
-        }());
+        var saveImage = function (img, rect, scale) {
+          resizeCanvasDrawImage('canvas', img, rect, scale);
+          saveCanvasImage('canvas', getNonExtension(img.filename), 'jpg', q);
+        };
+        convertImages(images, saveImage);
       };
 
       // 画像選択ボタンのイベントリスナー登録

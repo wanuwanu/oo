@@ -64,15 +64,29 @@ oo.getDataset = function (id, name) {
   if (element) return element.dataset[name];
 };
 
+oo.strReplace = function (src, before, after) {
+  return src.split(before).join(after);
+};
+
 oo.strToInt = function (s) {
   // forbid octal integer
   var n = 0;
-  if(s.substr(0, 2) === '0x' || s.substr(0, 2) === '0X'){
+  if (s.substr(0, 2) === '0x' || s.substr(0, 2) === '0X') {
     n = Number.parseInt(s, 16);
   } else {
     n = Number.parseInt(s, 10);
   }
   return (Number.isInteger(n)) ? n : 0;
+};
+
+oo.dup = function (str, n) {
+  var result = '';
+  for (var i = 0; i < n; i++) result += str;
+  return result;
+
+  // var result = '';
+  // oo.repeat(n, () => { result += str; });
+  // return result;
 };
 
 oo.zeroPadding = function (num, length) {

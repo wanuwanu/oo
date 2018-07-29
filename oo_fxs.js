@@ -37,13 +37,13 @@ class OoFxsEmitterFrame {
     this.life_time = 0;
     this.life_time_dist = 0;
     this.direction_type = oo.fxsDirectionType.kNormal;
-    this.direction = new Oo3DVector(0, 0);
+    this.direction = new Oo3DVector(0);
     this.direction_dist = 0;
     this.velocity0 = 0.0; // dist min
     this.velocity1 = 0.0; // dist max
     this.distribution_type = oo.fxsDistributionType.kNone;
-    this.position = new Oo3DVector(0, 0);
-    this.position_dist = new Oo3DVector(0, 0);
+    this.position = new Oo3DVector(0);
+    this.position_dist = new Oo3DVector(0);
     this.scale0 = 1; // dist min
     this.scale1 = 1; // dist max
     this.rotation0 = 0; // dist min
@@ -57,7 +57,7 @@ class OoFxsEmitterFrame {
 class OoFxsParticleFrame {
   constructor() {
     this.frame_num = 0;
-    this.scale = new Oo2DVector(1, 1);
+    this.scale = new Oo2DVector(1);
     this.alpha = 1.0;
   }
 }
@@ -107,12 +107,12 @@ class OoFxsParticleType extends OoFxsTypeBase {
     this.id = '';
     this.loop = false;
     this.total_frames = 0;
-    this.size = new Oo2DVector(1, 1);
-    this.center = new Oo2DVector(0, 0); // min -0.5, max 0.5
+    this.size = new Oo2DVector(1);
+    this.center = new Oo2DVector(0); // min -0.5, max 0.5
     this.texture_file = '';
     this.world = false;
 
-    if (oo.isValidObject(pt)) Object.assign(this, pt);
+    if (oo.isObject(pt)) Object.assign(this, pt);
   }
 
   getFrameData(frame_num) {
@@ -138,7 +138,7 @@ class OoFxsEmitterType extends OoFxsTypeBase {
     this.particle_name = '';
     this.max_particles = 0;
 
-    if (oo.isValidObject(et)) Object.assign(this, et);
+    if (oo.isObject(et)) Object.assign(this, et);
   }
 }
 

@@ -1,10 +1,34 @@
 // OoLibrary Copyright (c) wanu@nyagoya
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
+class OoVector {
+  constructor() { }
+
+  static add(v0, v1) {
+    return v0.clone().add(v1);
+  }
+
+  static sub(v0, v1) {
+    return v0.clone().sub(v1);
+  }
+
+  static mul(v0, v1) {
+    return v0.clone().mul(v1);
+  }
+
+  static div(v0, v1) {
+    return v0.clone().div(v1);
+  }
+
+  static distance2(v0, v1) {
+    return v0.clone().sub(v1).getMagnitude();
+  }
+}
+
 class Oo2DVector {
   constructor(x, y) {
     this.x = x || 0;
-    this.y = (y === void 0) ? this.x : y;
+    this.y = (y !== void 0) ? y : this.x;
   }
 
   clone() {
@@ -12,59 +36,50 @@ class Oo2DVector {
   }
 
   set(x, y) {
-    if (x instanceof Oo2DVector) {
-      this.x = x.x;
-      this.y = x.y;
+    if (oo.isObject(x)) {
+      this.x = x.x || 0;
+      this.y = x.y || 0;
     } else {
       this.x = x || 0;
-      this.y = (y === void 0) ? this.x : y;
+      this.y = y || 0;
     }
     return this;
   }
 
-  add(v) {
-    if (v instanceof Oo2DVector) {
-      this.x += v.x;
-      this.y += v.y;
+  // v.add(vector)         v    += vector
+  // v.add(scalar)         v.xy += scalar
+  // v.add(vector, scalar) v    += vector * scalar
+  add(v, s) {
+    if (oo.isObject(v)) {
+      if (s !== void 0) {
+        this.x += (v.x || 0) * s;
+        this.y += (v.y || 0) * s;
+      } else {
+        this.x += v.x || 0;
+        this.y += v.y || 0;
+      }
     } else {
-      this.x += v;
-      this.y += v;
+      this.x += v || 0;
+      this.y += v || 0;
     }
     return this;
   }
 
   sub(v) {
-    if (v instanceof Oo2DVector) {
-      this.x -= v.x;
-      this.y -= v.y;
-    } else {
-      this.x -= v;
-      this.y -= v;
-    }
+    this.x -= (oo.isObject(v) ? v.x : v) || 0;
+    this.y -= (oo.isObject(v) ? v.y : v) || 0;
     return this;
   }
 
   mul(v) {
-    if (v instanceof Oo2DVector) {
-      this.x *= v.x;
-      this.y *= v.y;
-    } else {
-      this.x *= v;
-      this.y *= v;
-    }
+    this.x *= (oo.isObject(v) ? v.x : v) || 0;
+    this.y *= (oo.isObject(v) ? v.y : v) || 0;
     return this;
   }
 
   div(v) {
-    if (v instanceof Oo2DVector) {
-      if (v.x !== 0) this.x /= v.x;
-      if (v.y !== 0) this.y /= v.y;
-    } else {
-      if (v !== 0) {
-        this.x /= v;
-        this.y /= v;
-      }
-    }
+    this.x /= (oo.isObject(v) ? v.x : v) || 1;
+    this.y /= (oo.isObject(v) ? v.y : v) || 1;
     return this;
   }
 
@@ -76,9 +91,21 @@ class Oo2DVector {
     return this;
   }
 
-  negative() {
+  negate() {
     this.x = - this.x;
     this.y = - this.y;
+    return this;
+  }
+
+  floor() {
+    this.x = Math.floor(this.x);
+    this.y = Math.floor(this.y);
+    return this;
+  }
+
+  ceil() {
+    this.x = Math.ceil(this.x);
+    this.y = Math.ceil(this.y);
     return this;
   }
 
@@ -101,8 +128,8 @@ class Oo2DVector {
     return this;
   }
 
-  getNegative() {
-    return this.clone().negative();
+  getNegation() {
+    return this.clone().negate();
   }
 
   getRound() {
@@ -113,12 +140,12 @@ class Oo2DVector {
     return this.clone().normalize();
   }
 
-  getSquareMagnitude() {
+  getMagnitudeSquared() {
     return this.x * this.x + this.y * this.y;
   }
 
   getMagnitude() {
-    return Math.sqrt(this.getSquareMagnitude());
+    return Math.sqrt(this.getMagnitudeSquared());
   }
 
   getAtan2() {
@@ -130,19 +157,23 @@ class Oo2DVector {
   }
 
   static add(v0, v1) {
-    return new Oo2DVector(v0.x + v1.x, v0.y + v1.y);
+    return v0.clone().add(v1);
   }
 
   static sub(v0, v1) {
-    return new Oo2DVector(v0.x - v1.x, v0.y - v1.y);
+    return v0.clone().sub(v1);
   }
 
   static mul(v0, v1) {
-    return new Oo2DVector(v0.x * v1.x, v0.y * v1.y);
+    return v0.clone().mul(v1);
   }
 
   static div(v0, v1) {
-    return new Oo2DVector(v0.x / v1.x, v0.y / v1.y);
+    return v0.clone().div(v1);
+  }
+
+  static angle(v0, v1) {
+    return Math.acos(Oo2DVector.dot(v1, v0) / (v1.getMagnitude() * v0.getMagnitude()));
   }
 
   static dot(v0, v1) {
@@ -171,11 +202,11 @@ class Oo2DVector {
     var k1 = 3.0 * s * s * t;
     var k2 = 3.0 * s * t * t;
     var k3 = t * t * t;
-
-    var v = v0.clone().mul(k0);
-    v.add(v1.clone().mul(k1));
-    v.add(v2.clone().mul(k2));
-    v.add(v3.clone().mul(k3));
+    var v = new Oo2DVector(0, 0);
+    v.add(v0, k0);
+    v.add(v1, k1);
+    v.add(v2, k2);
+    v.add(v3, k3);
     return v;
   }
 
@@ -196,69 +227,43 @@ class Oo3DVector {
   }
 
   set(x, y, z) {
-    if (x instanceof Oo3DVector) {
-      this.x = x.x;
-      this.y = x.y;
-      this.z = x.z;
+    if (oo.isObject(x)) {
+      this.x = x.x || 0;
+      this.y = x.y || 0;
+      this.z = x.z || 0;
     } else {
       this.x = x || 0;
-      this.y = (y === void 0) ? this.x : y;
-      this.z = (z === void 0) ? this.y : z;
+      this.y = y || 0;
+      this.z = z || 0;
     }
     return this;
   }
 
   add(v) {
-    if (v instanceof Oo3DVector) {
-      this.x += v.x;
-      this.y += v.y;
-      this.z += v.z;
-    } else {
-      this.x += v;
-      this.y += v;
-      this.z += v;
-    }
+    this.x += (oo.isObject(v) ? v.x : v) || 0;
+    this.y += (oo.isObject(v) ? v.y : v) || 0;
+    this.z += (oo.isObject(v) ? v.z : v) || 0;
     return this;
   }
 
   sub(v) {
-    if (v instanceof Oo3DVector) {
-      this.x -= v.x;
-      this.y -= v.y;
-      this.z -= v.z;
-    } else {
-      this.x -= v;
-      this.y -= v;
-      this.z -= v;
-    }
+    this.x -= (oo.isObject(v) ? v.x : v) || 0;
+    this.y -= (oo.isObject(v) ? v.y : v) || 0;
+    this.z -= (oo.isObject(v) ? v.z : v) || 0;
     return this;
   }
 
   mul(v) {
-    if (v instanceof Oo3DVector) {
-      this.x *= v.x;
-      this.y *= v.y;
-      this.z *= v.z;
-    } else {
-      this.x *= v;
-      this.y *= v;
-      this.z *= v;
-    }
+    this.x *= (oo.isObject(v) ? v.x : v) || 0;
+    this.y *= (oo.isObject(v) ? v.y : v) || 0;
+    this.z *= (oo.isObject(v) ? v.z : v) || 0;
     return this;
   }
 
   div(v) {
-    if (v instanceof Oo3DVector) {
-      if (v.x !== 0) this.x /= v.x;
-      if (v.y !== 0) this.y /= v.y;
-      if (v.z !== 0) this.z /= v.z;
-    } else {
-      if (v !== 0) {
-        this.x /= v;
-        this.y /= v;
-        this.z /= v;
-      }
-    }
+    this.x /= (oo.isObject(v) ? v.x : v) || 1;
+    this.y /= (oo.isObject(v) ? v.y : v) || 1;
+    this.z /= (oo.isObject(v) ? v.z : v) || 1;
     return this;
   }
 
@@ -272,10 +277,24 @@ class Oo3DVector {
     return this;
   }
 
-  negative() {
+  negate() {
     this.x = - this.x;
     this.y = - this.y;
     this.z = - this.z;
+    return this;
+  }
+
+  floor() {
+    this.x = Math.floor(this.x);
+    this.y = Math.floor(this.y);
+    this.z = Math.floor(this.z);
+    return this;
+  }
+
+  ceil() {
+    this.x = Math.ceil(this.x);
+    this.y = Math.ceil(this.y);
+    this.z = Math.ceil(this.z);
     return this;
   }
 
@@ -295,8 +314,8 @@ class Oo3DVector {
     return this;
   }
 
-  getNegative() {
-    return this.clone().negative();
+  getNegation() {
+    return this.clone().negate();
   }
 
   getRound() {
@@ -307,12 +326,12 @@ class Oo3DVector {
     return this.clone().normalize();
   }
 
-  getSquareMagnitude() {
+  getMagnitudeSquared() {
     return this.x * this.x + this.y * this.y + this.z * this.z;
   }
 
   getMagnitude() {
-    return Math.sqrt(this.getSquareMagnitude());
+    return Math.sqrt(this.getMagnitudeSquared());
   }
 
   getAtan2() {
@@ -323,20 +342,8 @@ class Oo3DVector {
     return Math.atan2(this.y, this.x) * 180.0 / Math.PI;
   }
 
-  static add(v0, v1) {
-    return new Oo3DVector(v0.x + v1.x, v0.y + v1.y, v0.z + v1.z);
-  }
-
-  static sub(v0, v1) {
-    return new Oo3DVector(v0.x - v1.x, v0.y - v1.y, v0.z - v1.z);
-  }
-
-  static mul(v0, v1) {
-    return new Oo3DVector(v0.x * v1.x, v0.y * v1.y, v0.z * v1.z);
-  }
-
-  static div(v0, v1) {
-    return new Oo3DVector(v0.x / v1.x, v0.y / v1.y, v0.z / v1.z);
+  static angle(v0, v1) {
+    return Math.acos(Oo3DVector.dot(v1, v0) / (v1.getMagnitude() * v0.getMagnitude()));
   }
 
   static dot(v0, v1) {
@@ -377,6 +384,10 @@ class Oo3DVector {
     v.add(v2.clone().mul(k2));
     v.add(v3.clone().mul(k3));
     return v;
+  }
+
+  static create(x, y, z) {
+    return new Oo3DVector(x, y);
   }
 }
 

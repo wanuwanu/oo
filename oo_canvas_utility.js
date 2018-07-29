@@ -128,7 +128,7 @@ oo.drawPointLightImage = function (target, color_pixel, size, intensity, attenua
       var sv = v.clone().mul(s);
 
       var fd = floor * v.clone().mul(n).getMagnitude();
-      var i = (attenuation(sv.getSquareMagnitude()) - fd) * intensity;
+      var i = (attenuation(sv.getMagnitudeSquared()) - fd) * intensity;
 
       r = color_pixel[0] * i;
       g = color_pixel[1] * i;

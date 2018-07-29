@@ -4,8 +4,8 @@
 class OoGameInputStatus {
   constructor() {
     this.touch_press = false;
-    this.touch_position = new Oo2DVector(0, 0);
-    this.touch_delta = new Oo2DVector(0, 0);
+    this.touch_position = new Oo2DVector(0);
+    this.touch_delta = new Oo2DVector(0);
   }
 }
 
