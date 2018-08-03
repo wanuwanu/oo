@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>oo Convert Image</title>
+</head>
+
+<body>
+  <div>
+    <input type="file" id="load" multiple="multiple" accept="image/*">
+  </div>
+  <br>
+  <div>
+    <button id="clear">クリア</button>
+  </div>
+  <br>
+  <div>
+    <button id="save_png">PNGで保存</button>
+  </div>
+  <br>
+  <div>
+    <button id="save_jpg">JPGで保存</button>
+    <label>画質</label>
+    <input type="number" id="quality" style="width:50px;">
+    <label>0.0 ～ 1.0 デフォルトは0.92</label>
+  </div>
+  <br>
+  <div>
+    <label>スケール指定</label>
+    <input type="number" id="scale" style="width:50px;">
+    <label>0.0 ～ デフォルトは1.0</label>
+  </div>
+  <br>
+  <div>
+    <label>領域指定</label>
+    <label>x</label>
+    <input type="number" id="ix" style="width:50px;">
+    <label>y</label>
+    <input type="number" id="iy" style="width:50px;">
+    <label>w</label>
+    <input type="number" id="iw" style="width:50px;">
+    <label>h</label>
+    <input type="number" id="ih" style="width:50px;">
+    <br>
+    <label>デフォルトは各画像の(0, 0, width * scale, height * scale)</label>
+  </div>
+
+  <br>
+  <div>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const images = [];
+
+      // キャンバス更新
+      var update = function () {
+        var total_width = 0;
+        var max_height = 0;
+        for (var img of images) {
+          total_width += img.width;
+          max_height = Math.max(max_height, img.height);
+        }
+        // 描画スケールを求める
+        var cw = Math.min(total_width, window.innerWidth);
+        var s = cw / total_width;
+        // キャンバスサイズを変更
+        canvas.width = cw;
+        canvas.height = max_height * s;
+        // 画像を描画
+        var ctx = canvas.getContext('2d');
+        var x = 0;
+        for (var img of images) {
+          ctx.drawImage(img, x, 0, img.width * s, img.height * s);
+          x += img.width * s;
+        }
+      };
+
+      // 画像のロード
+      var loadImageListener = (e) => {
+        var m = e.target.files.length;
+        var reader = [];
+        for (let i = 0; i < m; i++) {
+          reader[i] = new FileReader();
+          reader[i].onload = function () {
+            var n = images.length;
+            images[n] = new Image();
+            images[n].src = this.result;
+            images[n].filename = this.filename;
+            images[n].onload = () => { update(); };
+          };
+          reader[i].filename = e.target.files[i].name;
+          reader[i].readAsDataURL(e.target.files[i]);
+        }
+      };
+
+      // クリア
+      const button_clear = document.getElementById("clear");
+      button_clear.onclick = function () {
+        document.getElementById("load").value = '';
+        images.length = 0;
+        update();
+      };
+
+      const getNonExtension = function (filename) {
+        var pos = filename.lastIndexOf('.');
+        if (pos < 0) return filename;
+        return filename.substr(0, pos);
+      };
+
+      var getValueF = function (name, default_value) {
+        var v = document.getElementById(name).value;
+        var f = Number.parseFloat(v);
+        if (!Number.isFinite(f)) f = default_value;
+        return f;
+      };
+
+      var getValueI = function (name, default_value) {
+        var v = document.getElementById(name).value;
+        var i = Number.parseInt(v);
+        if (!Number.isInteger(i)) i = default_value;
+        return i;
+      };
+
+      // 画像内の矩形サイズでcanvasをリサイズして描画
+      // rect: { x, y, w, h }
+      var resizeCanvasDrawImage = function (canvas_name, image, rect, scale) {
+        var canvas = document.getElementById(canvas_name);
+        canvas.width = rect.w * scale;
+        canvas.height = rect.h * scale;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w * scale, rect.h * scale);
+      };
+
+      // ext 'jpg' || ' png'
+      var saveCanvasImage = function (canvas_name, file_name, ext, quality) {
+        var canvas = document.getElementById(canvas_name);
+        var link = document.createElement('a');
+        if (ext === 'jpg') link.href = canvas.toDataURL('image/jpeg', quality);
+        if (ext === 'png') link.href = canvas.toDataURL('image/png');
+        link.download = file_name + '.' + ext;
+        link.click();
+      };
+
+      var convertImages = function (images, saveProc) {
+        var scale = getValueF('scale', 1.0);
+        function* gen(p) {
+          for (var img of images) {
+            var x = getValueI('ix', 0);
+            var y = getValueI('iy', 0);
+            var w = getValueI('iw', 0) || img.width;
+            var h = getValueI('ih', 0) || img.height;
+            saveProc(img, { x, y, w, h }, scale);
+            yield p();
+          }
+        }
+        var g = gen(() => { setTimeout(() => { g.next(); }, 100); });
+        g.next();
+      };
+
+      // png書き出し
+      const button_save_png = document.getElementById("save_png");
+      button_save_png.onclick = function () {
+        var saveImage = function (img, rect, scale) {
+          resizeCanvasDrawImage('canvas', img, rect, scale);
+          saveCanvasImage('canvas', getNonExtension(img.filename), 'png');
+        };
+        convertImages(images, saveImage);
+      };
+
+      // jpg書き出し
+      const button_save_jpg = document.getElementById("save_jpg");
+      button_save_jpg.onclick = function () {
+        var q = getValueF('quality', 0.92);
+        var saveImage = function (img, rect, scale) {
+          resizeCanvasDrawImage('canvas', img, rect, scale);
+          saveCanvasImage('canvas', getNonExtension(img.filename), 'jpg', q);
+        };
+        convertImages(images, saveImage);
+      };
+
+      // 画像選択ボタンのイベントリスナー登録
+      const files = document.getElementById("load");
+      files.addEventListener('change', loadImageListener, false);
+    }, false);
+  </script>
+
+</body>
+
+</html>

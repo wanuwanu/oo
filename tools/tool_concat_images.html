@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>oo Concat Images</title>
+</head>
+
+<body>
+  <div>
+    <input type="file" id="load" multiple="multiple" accept="image/*">
+  </div>
+  <br>
+  <div>
+    <button id="clear">クリア</button>
+  </div>
+  <br>
+  <div>
+    <label>保存画像ファイル名</label>
+    <input type="text" id="save_filename">
+    <button id="save">保存</button>
+  </div>
+  <br>
+  <div>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const images = [];
+
+      // キャンバス更新
+      const update = function () {
+        // キャンバスサイズを計算
+        const n = images.length;
+        let w = 0;
+        let h = 0;
+        for (let i = 0; i < n; i++) {
+          w += images[i].width;
+          h = Math.max(h, images[i].height);
+        }
+        // キャンバスサイズを変更
+        canvas.width = w;
+        canvas.height = h;
+        // 画像を描画
+        const context = canvas.getContext('2d');
+        let x = 0;
+        for (let i = 0; i < n; i++) {
+          context.drawImage(images[i], x, 0);
+          x += images[i].width;
+        }
+      };
+
+      // 画像のロード
+      const loadImageListener = (e) => {
+        const m = e.target.files.length;
+        const reader = [];
+        for (let i = 0; i < m; i++) {
+          reader[i] = new FileReader();
+          reader[i].onload = function () {
+            const n = images.length;
+            images[n] = new Image();
+            images[n].src = this.result;
+            images[n].onload = () => { update(); };
+          };
+          reader[i].readAsDataURL(e.target.files[i]);
+        }
+      };
+
+      // クリア
+      const button_clear = document.getElementById("clear");
+      button_clear.onclick = function () {
+        images.length = 0;
+        update();
+      };
+
+      // 書き出し
+      const button_save = document.getElementById("save");
+      button_save.onclick = function () {
+        if (images.length === 0) return;
+        let filename = document.getElementById("save_filename").value;
+        if(filename === '') filename = 'output_image.png';
+        const canvas = document.getElementById("canvas");
+        const png = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = png;
+        link.download = filename;
+        link.click();
+      };
+
+      // 画像選択ボタンのイベントリスナー登録
+      const files = document.getElementById("load");
+      files.addEventListener('change', loadImageListener, false);
+    }, false);
+  </script>
+
+</body>
+
+</html>
