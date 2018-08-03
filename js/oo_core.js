@@ -25,10 +25,6 @@ oo.repeat = function (n, func) {
   for (var i = 0; i < n; i++) func(i);
 };
 
-oo.repeat2 = function (n, work, func) {
-  for (var i = 0; i < n; i++) func(i, work);
-};
-
 oo.clone = function (obj) {
   return Object.assign({}, obj);
 };

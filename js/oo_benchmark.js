@@ -42,12 +42,16 @@ class OoBenchmark {
       });
     }
 
+    oo.log('----');
+
     oo.log('weight');
     var w = [];
     oo.each(this.test_function, (e, i) => {
       w[i] = m[i] - m[0];
       oo.log('..' + this.test_function_name[i] + ' : ' + w[i].toFixed(1));
     });
+
+    oo.log('----');
 
     oo.log('ratio');
     oo.each(this.test_function, (e, i) => {

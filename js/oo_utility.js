@@ -48,16 +48,6 @@ oo.log = function (...args) {
   console.log.apply(null, args);
 };
 
-oo.appendScript = function (script_array, completion) {
-  var array = script_array.slice();
-  (function appendScriptCore() {
-    var script = document.createElement('script');
-    script.src = array.shift();
-    script.onload = array.length ? appendScriptCore : completion;
-    document.body.appendChild(script);
-  }());
-};
-
 // 要素のdatasetの値を取得する
 oo.getDataset = function (id, name) {
   var element = document.getElementById(id);
@@ -98,12 +88,6 @@ oo.zeroPadding = function (num, length) {
 oo.rgbColor = function (r, g, b) {
   var rgb = ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
   return '#' + ('000000' + rgb.toString(16)).slice(- 6);
-};
-
-oo.createImageFromFile = function (file) {
-  var img = new Image();
-  img.src = file;
-  return img;
 };
 
 // 配列の要素の交換
