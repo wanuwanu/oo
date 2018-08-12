@@ -107,3 +107,27 @@ oo.urlSearchParams = function (params) {
   }
   return map;
 };
+
+oo.base16 = {};
+
+oo.base16.encode = function (uint8array) {
+  var str = '';
+  //var code = '0123456789abcdef';
+
+  for (var u of uint8array) {
+    str += ('0' + u.toString(16)).slice(-2);
+    //str += code[(u & 0xf0) >> 4];
+    //str += code[u & 0x0f];
+  }
+  return str;
+};
+
+oo.base16.decode = function (base16str) {
+  var array = [];
+  var n = base16str.length / 2;
+  for (var i = 0; i < n; i++) {
+    array[i] = Number.parseInt(base16str.substr(i * 2, 2), 16);
+  }
+  return array;
+};
+

@@ -13,7 +13,14 @@ oo.$ = function () {
   // $('#id')
 
   // append child elements(nodes)
-  // $('#id', element, element, ...);
+  // $('#id', element1, element2, ...);
+  // #id - element1 - element2 - ...
+
+  // append child elements(nodes)
+  // $('#id', [element1, element2, ...]);
+  // #id -+- element1
+  //      +- element2
+  //      +- ...
 
   // create element(node)
   // ('@text')
@@ -22,14 +29,24 @@ oo.$ = function () {
 
   var $ = function (...args) {
     if (args.length === 0) return null;
-    var element = $getElement(args[0]);
-    if (element) {
+    var root = $getElement(args[0]);
+    if (root) {
+      var element = root;
       for (var i = 1; i < args.length; i++) {
-        var child = $getElement(args[i]);
-        if (child) element = element.appendChild(child);
+        var child = null;
+        var a = args[i];
+        if (Array.isArray(a)) {
+          for (var j = 0; j < a.length; j++) {
+            child = $getElement(a[j]);
+            if (child) element.appendChild(child);
+          }
+        } else {
+          child = $getElement(a);
+          if (child) element = element.appendChild(child);
+        }
       }
     }
-    return element;
+    return root;
   };
 
   var $getElement = function (obj) {
