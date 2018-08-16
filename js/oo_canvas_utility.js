@@ -100,7 +100,6 @@ oo.setTextAttributes = function (context, fontSize, fillStyle, textAlign, textBa
   context.textBaseline = textBaseline;
 };
 
-
 // 画像内の矩形サイズでcanvasをリサイズして描画
 // rect: { x, y, w, h }
 var resizeCanvasDrawImage = function (canvas_id, image, rect, scale) {

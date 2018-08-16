@@ -34,12 +34,20 @@ oo.getNonExtension = function (filename) {
   return filename.substr(0, pos);
 };
 
-oo.saveText = function (filename, text) {
-  var blob = new Blob([text], { type: 'text/plain' });
+oo.saveBlob = function (filename, blob) {
   var link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = filename + '.txt';
+  link.download = filename;
   link.click();
+};
+
+oo.saveBin = function (filename, array) {
+  var u8a = new Uint8Array(array);
+  oo.saveBlob(filename, new Blob([u8a]));
+};
+
+oo.saveText = function (filename, text) {
+  oo.saveBlob(filename, new Blob([text], { type: 'text/plain' }));
 };
 
 oo.loadText = function (filename, callback) {
@@ -54,3 +62,4 @@ oo.loadText = function (filename, callback) {
   };
   xhr.send('');
 };
+

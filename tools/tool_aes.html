@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>oo Aes</title>
+</head>
+
+<body>
+  <div>
+    <input type="file" id="file" multiple="multiple">
+  </div>
+  <br>
+  <div>
+    <textarea id="list" style="width:300px;height:10em" placeholder="選択されたファイル" readonly></textarea>
+  </div>
+  <br>
+  <div>
+    <button id="clear">クリア</button>
+  </div>
+  <br>
+  <div>
+    <label>暗号化キー</label>
+    <input type="text" id="key" style="width:200px;">
+  </div>
+  <br>
+  <div>
+    <button id="save_bin">暗号化バイナリ保存</button>
+  </div>
+  <br>
+  <div>
+    <button id="save_base16">暗号化base16保存</button>
+  </div>
+  <br>
+  <br>
+  <div>
+    <button id="decode_from_bin">バイナリから復号化</button>
+  </div>
+  <br>
+  <div>
+    <button id="decode_from_b16">base16から復号化</button>
+  </div>
+
+
+
+  <script src="../js/concat/oo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var files = [];
+
+      var update = function () {
+        updateFileList();
+      }
+
+      var updateFileList = function () {
+        var value = '';
+        for (var f of files) value += f.filename + '\n';
+        document.getElementById("list").value = value;
+      };
+
+      // ファイルのロード
+      var fileListener = (e) => {
+        for (var file of e.target.files) {
+          var reader = new FileReader();
+          var obj = { filename: file.name, reader };
+          files.push(obj);
+          reader.onload = function () {
+            this.p_obj.buffer = new Uint8Array(this.result);
+            update();
+          }
+          reader.p_obj = obj;
+          reader.readAsArrayBuffer(file);
+        }
+      };
+
+      // クリア
+      var button_clear = document.getElementById("clear");
+      button_clear.onclick = function () {
+        document.getElementById("file").value = '';
+        files.length = 0;
+        update();
+      };
+
+      var getNonExtension = function (filename) {
+        var pos = filename.lastIndexOf('.');
+        if (pos < 0) return filename;
+        return filename.substr(0, pos);
+      };
+
+      var encodeFiles = function (files, saveProc) {
+        var key = document.getElementById("key").value;
+        function* gen(p) {
+          for (var f of files) {
+            var aes = new OoAes();
+            aes.setKey(oo.aesType.kAes128, oo.utf8bin.encode(key));
+            var enc = aes.encode(f.buffer);
+            saveProc(f.filename, enc);
+            yield p();
+          }
+        }
+        var g = gen(() => { setTimeout(() => { g.next(); }, 100); });
+        g.next();
+      };
+
+      // bin書き出し
+      var button_save_bin = document.getElementById("save_bin");
+      button_save_bin.onclick = function () {
+        var saveData = function (filename, enc) {
+          var u8 = new Uint8Array(enc.length);
+          for (var i = 0; i < enc.length; i++) u8[i] = enc[i];
+          var blob = new Blob([u8]);
+          var link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = getNonExtension(filename) + '.aes';
+          link.click();
+        };
+        encodeFiles(files, saveData)
+      };
+
+      // base16書き出し
+      var button_save_base16 = document.getElementById("save_base16");
+      button_save_base16.onclick = function () {
+        var saveData = function (filename, enc) {
+          var base16 = oo.base16.encode(enc);
+          var blob = new Blob([base16]);
+          var link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = getNonExtension(filename) + '.b16';
+          link.click();
+        };
+        encodeFiles(files, saveData)
+      };
+
+      // 復号
+      var decodeFiles = function (files, type) {
+        var key = document.getElementById("key").value;
+        function* gen(p) {
+          for (var f of files) {
+            var aes = new OoAes();
+            aes.setKey(oo.aesType.kAes128, oo.utf8bin.encode(key));
+            var bin;
+            if (type === 'bin') bin = f.buffer;
+            if (type === 'b16') {
+              var b16 = oo.utf8bin.decode(f.buffer);
+              bin = oo.base16.decode(b16);
+            }
+            var output = aes.decode(bin);
+            oo.saveBin(getNonExtension(f.filename) + '.decode', output);
+            yield p();
+          }
+        }
+        var g = gen(() => { setTimeout(() => { g.next(); }, 100); });
+        g.next();
+      };
+
+      document.getElementById("decode_from_bin").onclick = function () {
+        decodeFiles(files, 'bin');
+      };
+
+      document.getElementById("decode_from_b16").onclick = function () {
+        decodeFiles(files, 'b16');
+      };
+
+      // ファイル選択
+      var button_file = document.getElementById("file");
+      button_file.addEventListener('change', fileListener, false);
+    }, false);
+  </script>
+
+</body>
+
+</html>

@@ -331,4 +331,35 @@ class OoAes {
 
     OoAes._put32x4(dst, buffer);
   }
+
+  encode(uint8array){
+    var array = [];
+
+    var n = uint8array.length;
+    var nb = (n + 15) / 16;
+
+    var dst = new Array(16);
+    for(var b = 0; b < nb; b++){
+      var src = uint8array.slice(b * 16, (b + 1) * 16);
+      this.encrypt(dst, src);
+      for(var i = 0; i < 16; i++) array[b * 16 + i] = dst[i];
+    }
+    return array;
+  }
+
+  decode(aes8_array){
+    var array = [];
+
+    var n = aes8_array.length;
+    var nb = n / 16;
+
+    var dst = new Array(16);
+    for(var b = 0; b < nb; b++){
+      var src = aes8_array.slice(b * 16, (b + 1) * 16);
+      this.decrypt(dst, src);
+      for(var i = 0; i < 16; i++) array[b * 16 + i] = dst[i];
+    }
+    return array;
+  }
+
 }
