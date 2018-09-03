@@ -23,6 +23,15 @@
     <button id="clear">クリア</button>
   </div>
   <br>
+
+  <form id="aes_type">
+    暗号化方式
+    <input type="radio" name="aes_type" value="128" checked>AES128
+    <input type="radio" name="aes_type" value="192">AES192
+    <input type="radio" name="aes_type" value="256">AES256
+  </form>
+  <br>
+
   <div>
     <label>暗号化キー</label>
     <input type="text" id="key" style="width:200px;">
@@ -91,12 +100,19 @@
         return filename.substr(0, pos);
       };
 
+      var getAesType = function () {
+        var type = document.getElementById("aes_type").aes_type.value;
+        if (type === '128') return oo.aesType.kAes128;
+        if (type === '192') return oo.aesType.kAes192;
+        if (type === '256') return oo.aesType.kAes256;
+      }
+
       var encodeFiles = function (files, saveProc) {
         var key = document.getElementById("key").value;
         function* gen(p) {
           for (var f of files) {
             var aes = new OoAes();
-            aes.setKey(oo.aesType.kAes128, oo.utf8bin.encode(key));
+            aes.setKey(getAesType(), oo.utf8bin.encode(key));
             var enc = aes.encode(f.buffer);
             saveProc(f.filename, enc);
             yield p();
@@ -141,7 +157,7 @@
         function* gen(p) {
           for (var f of files) {
             var aes = new OoAes();
-            aes.setKey(oo.aesType.kAes128, oo.utf8bin.encode(key));
+            aes.setKey(getAesType(), oo.utf8bin.encode(key));
             var bin;
             if (type === 'bin') bin = f.buffer;
             if (type === 'b16') {
