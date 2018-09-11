@@ -25,6 +25,10 @@ oo.repeat = function (n, func) {
   for (var i = 0; i < n; i++) func(i);
 };
 
+oo.meet = function (value, array) {
+  return (array.indexOf(value) >= 0) ? true : false;
+};
+
 oo.clone = function (obj) {
   return Object.assign({}, obj);
 };
