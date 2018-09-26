@@ -65,4 +65,33 @@ class OoRandom {
 
   // roll a dice
   roll(num_faces) { return this.roll0(num_faces) + 1; }
+
+  // distribution uniform3
+  getUniform3() {
+    var x = this.get2();
+    var y = this.get2();
+    var z = this.get2();
+    return new Oo3DVector(x, y, z);
+  }
+
+  // distribution ball
+  getBall() {
+    do {
+      var x = this.get2();
+      var y = this.get2();
+      var z = this.get2();
+    } while (x * x + y * y + z * z > 1);
+    return new Oo3DVector(x, y, z);
+  }
+
+  // distribution sphere
+  getSphere() {
+    var z = this.get2();
+    var r = Math.sqrt(1.0 - z * z);
+    var p = this.get() * Math.PI * 2;
+    var x = r * Math.cos(p);
+    var y = r * Math.sin(p);
+    return new Oo3DVector(x, y, z);
+  }
+
 }

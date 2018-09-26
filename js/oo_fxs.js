@@ -172,6 +172,7 @@ class OoFxsParticleStatus {
 class OoFxs {
   constructor() {
     this.position = new Oo3DVector(0);
+    this.random = new OoRandom();
   }
 
   generateParticle(ps, ef, pt) {
@@ -194,21 +195,11 @@ class OoFxs {
       ps.velocity.z = ef.direction.z * v;
     }
 
-    // 置き換える
-    var getDistributionSphere = function () {
-      var z = Math.random() * 2.0 - 1.0;
-      var r = Math.sqrt(1.0 - z * z);
-      var p = Math.random() * Math.PI * 2;
-      var x = r * Math.cos(p);
-      var y = r * Math.sin(p);
-      return new Oo3DVector(x, y);
-    };
-
     if (ef.direction_type === oo.fxsDirectionType.kSphere) {
-      var dir = getDistributionSphere();
-      ps.velocity.x = dir.x * v;
-      ps.velocity.y = dir.y * v;
-      ps.velocity.z = dir.z * v;
+      var d = this.random.getSphere();
+      ps.velocity.x = d.x * v;
+      ps.velocity.y = d.y * v;
+      ps.velocity.z = d.z * v;
     }
 
     var s = oo.lerp(ef.scale0, ef.scale1, Math.random());
@@ -217,6 +208,19 @@ class OoFxs {
 
     ps.rotation = oo.lerp(ef.rotation0, ef.rotation1, Math.random());
     ps.rotate_v = oo.lerp(ef.rotate_v0, ef.rotate_v1, Math.random());
+  }
+
+  create(emitter_type, particle_type) {
+    var es = new OoFxsEmitterStatus();
+    es.emitter_type = emitter_type;
+    es.particle_type = particle_type;
+    this.emitter_status = es;
+
+    // パーティクルバッファ固定確保
+    es.particle_status_array = [];
+    for (var i = 0; i < emitter_type.max_particles; i++) {
+      es.particle_status_array[i] = new OoFxsParticleStatus();
+    }
   }
 
   update() {
@@ -230,7 +234,9 @@ class OoFxs {
     let j = 0;
     for (let i = 0; i < es.num_particles; i++) {
       if (es.particle_status_array[i].life_time <= 0) continue;
-      if (i !== j) es.particle_status_array[j] = es.particle_status_array[i];
+      if (i !== j) {
+        es.particle_status_array[j] = es.particle_status_array[i];
+      }
       j++;
     }
     es.num_particles = j;
