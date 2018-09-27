@@ -11,7 +11,7 @@ class OoStopMotion {
     this.current_frame = 0;
     this.frame60 = 0;
     this.elapsed_time = 0;
-    this.time0 = (new Date()).getTime();
+    this.time0 = Date.now();
     this.position = new Oo2DVector(0);
   }
 
@@ -33,11 +33,11 @@ class OoStopMotion {
     this.current_frame = 0;
     this.frame60 = 0;
     this.elapsed_time = 0;
-    this.time0 = (new Date()).getTime();
+    this.time0 = Date.now();
   }
 
   updateByTime() {
-    var time1 = (new Date()).getTime();
+    var time1 = Date.now();
     this.elapsed_time += time1 - this.time0;
     this.time0 = time1;
     this.current_frame = Math.floor((this.elapsed_time * this.fps) / 1000);

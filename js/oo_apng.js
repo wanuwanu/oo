@@ -19,12 +19,20 @@ oo.asyncCreateApng = function (url, callback) {
   return apng;
 };
 
-class OoApng extends OoDrawObject {
+class OoApng extends OoRenderSprite {
   constructor() {
     super();
 
+    this.fps = 60;
+    this.current_frame = 0;
+    this.frame60 = 0;
+    this.elapsed_time = 0;
+    this.time0 = Date.now();
+
     this.crc_table = [];
     this.makeCrcTable();
+
+    this.frames = [];
   }
 
   create(buffer) {
@@ -34,23 +42,22 @@ class OoApng extends OoDrawObject {
       if (this.buffer[i] !== png_signature[i]) return false;
     }
 
-    this.frames = [];
 
-    var pos = 8;
-    var data0 = [];
-    var data1 = [];
-    var table = {};
+    var data = [];
 
-    table['IHDR'] = (pos) => {
+    var func_table = {};
+
+    func_table['IHDR'] = (pos, length) => {
       this.width = this.readUint32(pos + 8);
       this.height = this.readUint32(pos + 8 + 4);
+      this.header = { pos: pos + 8, length: length };
     };
-    table['acTL'] = (pos) => {
+    func_table['acTL'] = (pos) => {
       this.num_frames = this.readUint32(pos + 8);
       this.num_plays = this.readUint32(pos + 8 + 4);
     };
 
-    table['fcTL'] = (pos) => {
+    func_table['fcTL'] = (pos) => {
       var frame = {};
       frame.sequence_number = this.readUint32(pos + 8);
       frame.width = this.readUint32(pos + 8 + 4);
@@ -61,45 +68,58 @@ class OoApng extends OoDrawObject {
       frame.delay_den = this.readUint16(pos + 8 + 22);
       frame.dispose_op = this.readUint8(pos + 8 + 24);
       frame.blend_op = this.readUint8(pos + 8 + 25);
+      frame.data = [];
       this.frames.push(frame);
     };
-    table['fdAT'] = (pos) => {
-      this.frames[this.frames.length - 1].data = { pos: pos + 8 + 4, length: length - 4 }
+    func_table['fdAT'] = (pos, length) => {
+      var n = this.frames.length;
+      if (n) this.frames[n - 1].data.push({ pos: pos + 8 + 4, length: length - 4 });
     };
-    table['IDAT'] = (pos) => {
-      this.frames[this.frames.length - 1].data = { pos: pos + 8, length };
+    func_table['IDAT'] = (pos, length) => {
+      var n = this.frames.length;
+      if (n) this.frames[n - 1].data.push({ pos: pos + 8, length: length });
     };
-    table['IEND'] = (pos) => { data1.push({ pos: pos, length: 12 + length }); };
-    table[''] = (pos) => { data0.push({ pos: pos, length: 12 + length }); };
+    func_table[''] = (pos, length) => {
+      data.push({ pos: pos, length: 12 + length });
+    };
+
+    var pos = 8;
 
     while (true) {
       var length = this.readUint32(pos);
       var type = this.readString(pos + 4, 4);
-      if (table[type] === void 0) type = '';
-      table[type](pos);
       if (type === 'IEND') break;
+      if (func_table[type] === void 0) type = '';
+      func_table[type](pos, length);
       pos += 12 + length;
       if (pos >= this.buffer.size) break;
     }
+
 
     for (var i = 0; i < this.frames.length; i++) {
       var frame = this.frames[i];
       var blob_array = [];
       blob_array.push(png_signature);
 
-      var u8 = new Uint8Array(8);
+      var u8 = this.makeU8(this.header);
       this.writeUint32(u8, 0, frame.width);
       this.writeUint32(u8, 4, frame.height);
-      blob_array.push(this.makeChunk('IDAT', u8, 0, 8));
-      
+      blob_array.push(this.makeChunk('IHDR', u8, 0, u8.length));
 
-      blob_array.push(this.makeU8(data0));
-      blob_array.push(this.makeChunk('IDAT', this.buffer, frame.data.pos, frame.data.length));
-      blob_array.push(this.makeU8(data1));
+      for (var j = 0; j < data.length; j++) blob_array.push(this.makeU8(data[j]));
+      for (var j = 0; j < frame.data.length; j++) {
+        blob_array.push(this.makeChunk('IDAT', this.buffer, frame.data[j].pos, frame.data[j].length));
+      }
+      blob_array.push(this.makeChunk('IEND', null, 0, 0));
       var blob = new Blob(blob_array, { 'type': 'image/png' });
+
       frame.img = new Image();
       frame.img.src = URL.createObjectURL(blob);
+      frame.img.onload = function () { };
+      frame.img.onerror = function () { oo.log('oo_apng : create error'); };
     }
+
+    super.create(this.width, this.height);
   }
 
   makeU8(data) {
@@ -148,12 +168,8 @@ class OoApng extends OoDrawObject {
   }
 
   readUint8(pos) { return this.buffer[pos]; }
-  readUint16(pos) {
-    return (this.buffer[pos] << 8) | this.buffer[pos + 1];
-  }
-  readUint32(pos) {
-    return (this.readUint16(pos) << 16) | this.readUint16(pos + 2);
-  }
+  readUint16(pos) { return (this.buffer[pos] << 8) | this.buffer[pos + 1]; }
+  readUint32(pos) { return (this.readUint16(pos) << 16) | this.readUint16(pos + 2); }
 
   readString(pos, length) {
     var str = '';
@@ -164,17 +180,78 @@ class OoApng extends OoDrawObject {
   }
 
   start() {
-
+    this.play_counter = 0;
+    this.setStartFrame();
   }
 
-  updateByTime() {
+  setStartFrame() {
+    this.time0 = Date.now();
+    this.current_frame = 0;
+    this.frame_time0 = 0;
+
+    this.canvas_context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    var frame = this.frames[0];
+    if (frame.dispose_op === 2) this.pushCanvas();
+    this.canvas_context.drawImage(frame.img, frame.x_offset, frame.y_offset);
   }
 
-  draw(context) {
+  // updateByTime() {
+  //   var time1 = Date.now();
+  //   this.elapsed_time += time1 - this.time0;
+  //   this.time0 = time1;
+  //   this.current_frame = Math.floor((this.elapsed_time * this.fps) / 1000);
+  // }
 
-    // var frame = oo.clamp(this.current_frame, 0, this.images.length - 1);
-    // var image = this.images[frame];
-    var image = this.frames[0].img;
-    context.drawImage(image, this.position.x, this.position.y);
+  pushCanvas() {
+    this.image_data = this.canvas_context.getImageData(0, 0, this.canvas.width, this.canvas.height);
   }
+
+  popCanvas() {
+    this.canvas_context.putImageData(this.image_data, 0, 0);
+  }
+
+  update() {
+    if ((this.num_plays !== 0) && (this.play_counter >= this.num_plays)) return;
+
+    var elapsed_time = Date.now() - this.time0;
+
+    while (true) {
+      var frame = this.frames[this.current_frame];
+      var delay_num = frame.delay_num;
+      var delay_den = frame.delay_den || 100;
+
+      if (this.frame_time0 * delay_den + delay_num * 1000 > elapsed_time * delay_den) break;
+
+      // フレーム更新    
+      this.frame_time0 += 1000 * delay_num / delay_den;
+      this.current_frame++;
+      if (this.current_frame >= this.num_frames) {
+        this.play_counter++;
+        this.setStartFrame();
+        break;
+      } else {
+        var frame2 = this.frames[this.current_frame];
+
+        // dispose_op
+        // 0 : APNG_DISPOSE_OP_NONE
+        // 1 : APNG_DISPOSE_OP_BACKGROUND
+        // 2 : APNG_DISPOSE_OP_PREVIOUS
+        if (frame.dispose_op === 1) this.canvas_context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (frame.dispose_op === 2) {
+          this.popCanvas();
+        } else {
+          if (frame2.dispose_op === 2) this.pushCanvas();
+        }
+
+        // blend_op
+        // 0 : APNG_BLEND_OP_SOURCE
+        // 1 : APNG_BLEND_OP_OVER
+        if (frame2.blend_op === 0) {
+          this.canvas_context.clearRect(frame2.x_offset, frame2.y_offset, frame2.width, frame2.height);
+        }
+        this.canvas_context.drawImage(frame2.img, frame2.x_offset, frame2.y_offset);
+      }
+    }
+  }
+
 }
