@@ -13,9 +13,9 @@ oo.asyncCreateApng = function (url, callback) {
   xhr.responseType = 'arraybuffer';
   xhr.onload = () => {
     apng.create(xhr.response);
-    callback();
+    if (callback) callback();
   };
-  xhr.onerror = () => { callback(); };
+  xhr.onerror = () => { if (callback) callback(); };
   xhr.onabort = xhr.onerror;
   xhr.ontimeout = xhr.onerror;
   xhr.send();
@@ -202,6 +202,8 @@ class OoApng extends OoRenderSprite {
   }
 
   setStartFrame() {
+    if(!this.is_apng) return;
+
     this.time0 = Date.now();
     this.current_frame = 0;
     this.frame_time0 = 0;
@@ -221,6 +223,8 @@ class OoApng extends OoRenderSprite {
   }
 
   update() {
+    if(!this.is_apng) return;
+
     if (this.time0 === 0) this.start();
 
     if ((this.num_plays !== 0) && (this.play_counter >= this.num_plays)) return;

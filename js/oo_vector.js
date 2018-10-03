@@ -17,27 +17,23 @@ class Oo2DVector {
       this.y = x.y || 0;
     } else {
       this.x = x || 0;
-      this.y = y || 0;
+      this.y = (y !== void 0) ? y : this.x;
     }
     return this;
   }
 
-  // v.add(vector)         v    += vector
-  // v.add(scalar)         v.xy += scalar
-  // v.add(vector, scalar) v    += vector * scalar
-  add(v, s) {
-    if (oo.isObject(v)) {
-      if (s !== void 0) {
-        this.x += (v.x || 0) * s;
-        this.y += (v.y || 0) * s;
-      } else {
-        this.x += v.x || 0;
-        this.y += v.y || 0;
-      }
-    } else {
-      this.x += v || 0;
-      this.y += v || 0;
-    }
+  // v.add(vector)  v    += vector
+  // v.add(scalar)  v.xy += scalar
+  add(v) {
+    this.x += (oo.isObject(v) ? v.x : v) || 0;
+    this.y += (oo.isObject(v) ? v.y : v) || 0;
+    return this;
+  }
+
+  // v.addSV(vector, scalar)  v += vector * scalar
+  addSV(v, s) {
+    this.x += (v.x || 0) * s;
+    this.y += (v.y || 0) * s;
     return this;
   }
 
@@ -179,10 +175,10 @@ class Oo2DVector {
     var k2 = 3.0 * s * t * t;
     var k3 = t * t * t;
     var v = new Oo2DVector(0, 0);
-    v.add(v0, k0);
-    v.add(v1, k1);
-    v.add(v2, k2);
-    v.add(v3, k3);
+    v.addSV(v0, k0);
+    v.addSV(v1, k1);
+    v.addSV(v2, k2);
+    v.addSV(v3, k3);
     return v;
   }
 
@@ -209,28 +205,23 @@ class Oo3DVector {
       this.z = x.z || 0;
     } else {
       this.x = x || 0;
-      this.y = y || 0;
-      this.z = z || 0;
+      this.y = (y !== void 0) ? y : this.x;
+      this.z = (z !== void 0) ? z : this.y;
     }
     return this;
   }
 
-  add(v, s) {
-    if (oo.isObject(v)) {
-      if (s !== void 0) {
-        this.x += (v.x || 0) * s;
-        this.y += (v.y || 0) * s;
-        this.z += (v.z || 0) * s;
-      } else {
-        this.x += v.x || 0;
-        this.y += v.y || 0;
-        this.z += v.z || 0;
-      }
-    } else {
-      this.x += v || 0;
-      this.y += v || 0;
-      this.z += v || 0;
-    }
+  add(v) {
+    this.x += (oo.isObject(v) ? v.x : v) || 0;
+    this.y += (oo.isObject(v) ? v.y : v) || 0;
+    this.z += (oo.isObject(v) ? v.z : v) || 0;
+    return this;
+  }
+
+  addSV(v, s) {
+    this.x += (v.x || 0) * s;
+    this.y += (v.y || 0) * s;
+    this.z += (v.z || 0) * s;
     return this;
   }
 
@@ -384,10 +375,10 @@ class Oo3DVector {
     var k3 = t * t * t;
 
     var v = new Oo3DVector(0, 0, 0);
-    v.add(v0, k0);
-    v.add(v1, k1);
-    v.add(v2, k2);
-    v.add(v3, k3);
+    v.addSV(v0, k0);
+    v.addSV(v1, k1);
+    v.addSV(v2, k2);
+    v.addSV(v3, k3);
     return v;
   }
 
