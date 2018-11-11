@@ -13,6 +13,7 @@ oo.isObject = function (obj) { return (typeof obj === 'object') && (obj !== null
 // oo.each(array, 'method', arg);
 // oo.each(array, (e, i, a) => { });
 oo.each = function (array, func, ...args) {
+  if(!Array.isArray(array)) return;
   if (typeof func === 'string') {
     for (var x of array) x[func].apply(x, args);
   }
