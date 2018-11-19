@@ -55,7 +55,7 @@ class OoBenchmark {
 
     oo.log('ratio');
     oo.each(this.test_function, (e, i) => {
-      oo.log('..' + this.test_function_name[i] + ' : ' + (w[i] / w[1]).toFixed(1));
+      oo.log('..' + this.test_function_name[i] + ' : ' + (w[i] / w[1]).toFixed(2));
     });
 
     oo.log('----');
