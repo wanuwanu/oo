@@ -16,6 +16,9 @@ class OoTextBox extends OoDrawObject {
     this.content_height = 0;
     this.row = [];
     this.context = null;
+
+    this.line_head_japanese_hyphenation = false;
+    this.line_head_japanese_hyphenation_characters = '、。';
   }
 
   setRect(rect) {
@@ -43,7 +46,16 @@ class OoTextBox extends OoDrawObject {
         this.row.push(oo.clone(t));
       } else {
         var w = ctx.measureText(this.row[last].text + c).width;
-        if (w > this.size.x) {
+
+        // 行頭禁則文字チェック
+        var lhjh = false;
+        if (this.line_head_japanese_hyphenation) {
+          if(this.line_head_japanese_hyphenation_characters.indexOf(c) >= 0){
+            lhjh = true;
+          }
+        }
+
+        if (w > this.size.x && !lhjh) {
           this.row[last].line_space = this.wordwrap_space;
           this.row.push({ text: c, width: ctx.measureText(c).width, line_space: 0 });
         } else {

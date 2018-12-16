@@ -108,6 +108,18 @@ oo.urlSearchParams = function (params) {
   return map;
 };
 
+oo.urlSearchParams2 = function (params) {
+  params = params || document.location.search;
+  if (params.charAt(0) === '?') params = params.substr(1);
+  var obj = {};
+  var array = params.split('&');
+  for (var item of array) {
+    var kv = item.split('=');
+    obj[kv[0]] = kv[1] || '';
+  }
+  return obj;
+};
+
 oo.uint32ToUint8ArrayBE = function (x) {
   return [x >>> 24, (x >>> 16) & 0xff, (x >>> 8) & 0xff, x & 0xff];
 };

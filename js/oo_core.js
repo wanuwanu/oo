@@ -4,6 +4,7 @@
 var oo = oo || {};
 oo.env = oo.env || {};
 oo.env.debug_log = false;
+oo.env.main_proc = null;
 
 oo.qq = function (v, value) { return (v !== void 0) ? v : value; };
 oo.isObject = function (obj) { return (typeof obj === 'object') && (obj !== null) && !Array.isArray(obj); };
@@ -95,6 +96,7 @@ oo.setupQuery = function () {
 };
 
 oo.main = function (main_proc) {
+  oo.env.main_proc = main_proc;
   document.addEventListener('DOMContentLoaded', function () {
     main_proc();
   }, false);

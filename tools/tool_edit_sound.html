@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>oo Sound Editer</title>
+</head>
+
+<body>
+  <div>
+    <input type="file" id="file" multiple="multiple">
+  </div>
+
+  <div>
+    <button id="play">再生</button>
+  </div>
+
+  <script src="../js/concat/oo.js"></script>
+  <script>
+    oo.main(() => {
+      var $ = oo.$();
+
+      // var $ = oo.setupQuery();
+      // $('canvas', 'canvas');
+      // $('#canvas').style.background = '#000';
+
+      $({ tag: 'canvas', id: 'app_canvas' });
+      $(document.body, '#app_canvas');
+      $('#app_canvas').style.background = '#fff';
+
+      var canvas = $('#app_canvas');
+      var ctx = canvas.getContext('2d');
+      canvas.width = 441;
+      canvas.height = 300;
+
+      var updateWave = function (buffer) {
+        var canvas = $('#app_canvas');
+        var ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        var ch0 = buffer.getChannelData(0);
+        var ch1 = buffer.getChannelData(1);
+
+        var n1 = Math.ceil(buffer.length / 10);
+        var f32a_l = new Float32Array(n1);
+        var f32a_h = new Float32Array(n1);
+        for (var i = 0; i < n1; i++) {
+          f32a_l[i] = ch0[10000 + i * 10];
+          f32a_h[i] = ch0[10000 + i * 10];
+        }
+
+        var n2 = Math.ceil(buffer.length / 100);
+        var f32a_l2 = new Float32Array(n1);
+        var f32a_h2 = new Float32Array(n1);
+        for (var i = 0; i < n1; i++) {
+          f32a_l2[i] = ch0[10000 + i * 100];
+          f32a_h2[i] = ch0[10000 + i * 100];
+        }
+
+
+        ctx.strokeStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.moveTo(0, 50);
+
+        var n = (buffer.length < 441) ? buffer.length : 441;
+
+        for (var x = 0; x < n; x++) {
+          var y = ch0[10000 + x] * 50 + 50;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // 1/10 圧縮表示
+        ctx.strokeStyle = '#008800';
+        ctx.beginPath();
+        ctx.moveTo(0, 150);
+
+        var n = (n1 < 441) ? n1 : 441;
+
+        for (var x = 0; x < n1; x++) {
+          var y = f32a_l[x] * 50 + 150;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // 1/100 圧縮表示
+        ctx.strokeStyle = '#0000ff';
+        ctx.beginPath();
+        ctx.moveTo(0, 250);
+
+        var n = (n2 < 441) ? n2 : 441;
+
+        for (var x = 0; x < n2; x++) {
+          var y = f32a_l2[x] * 50 + 250;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+
+      };
+
+
+      var audio_context = new AudioContext();
+
+      var sound;
+
+      var createSound = function (buffer) {
+        sound = new OoSound();
+        sound.context = audio_context;
+        sound.context.decodeAudioData(buffer, function (buffer) {
+          sound.buffer = buffer;
+
+          updateWave(buffer);
+
+
+          sound.play = function () {
+            if (!this.context) return;
+            var source = this.context.createBufferSource();
+            source.buffer = this.buffer;
+            source.connect(this.context.destination);
+            source.loop = true;
+            source.loopStart = 1;
+            source.loopEnd = 2;
+            source.start();
+          }
+        });
+      }
+
+      // ファイルのロード
+      var fileListener = (e) => {
+        for (let file of e.target.files) {
+          var reader = new FileReader();
+          reader.onload = function () { createSound(this.result); };
+          reader.readAsArrayBuffer(file);
+        }
+      };
+
+      // ファイル選択
+      $('#file').addEventListener('change', fileListener, false);
+
+      // 再生
+      $('#play').onclick = function () {
+        sound.play();
+      };
+    });
+  </script>
+
+</body>
