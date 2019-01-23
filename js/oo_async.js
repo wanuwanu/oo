@@ -86,45 +86,52 @@ oo.asyncLoadText = function (file, proceeder) {
 
 
 // send_objをJSONにして送り、
-// 受け取ったJSONをrecv_objにセットする
-oo.ajaxJson = function (method, url, send_obj, recv_obj, callback) {
+// 受け取ったJSONをresult.objにセットする
+oo.ajaxJson = function (method, url, send_obj, callback) {
   var json = JSON.stringify(send_obj);
-  var obj = oo.ajax(method, url, json, 'application/json', () => {
-    if (obj.status === 'ok') {
-      Object.assign(recv_obj, JSON.parse(obj.text));
+  return oo.ajax(method, url, json, 'application/json', (result) => {
+    if (result.status === 'ok') {
+      result.obj = JSON.parse(result.text);
     }
-    callback();
+    callback(result);
   });
-  return obj;
+
 };
 
 // method 'GET' or 'POST'
 // content_type 'application/json', 'application/x-www-form-urlencoded', ...
+// 
+// 結果は、callbackの引数と、関数の返値の両方で渡される
+//
+// ex.
+// oo.ajax('POST', 'http://www.nyagoya.net', {}, null, (result) => { });
+// var result = oo.ajax('POST', 'http://www.nyagoya.net', {}, null);
+//
 oo.ajax = function (method, url, data, content_type, callback) {
-  var obj = {};
+  var result = {};
   var xhr = new XMLHttpRequest();
   xhr.open(method, url, true);
 
   xhr.onload = () => {
-    obj.text = xhr.responseText;
-    obj.status = 'ok';
-    callback();
+    result.text = xhr.responseText;
+    result.status = 'ok';
+    callback && callback(result);
   };
 
   xhr.onerror = () => {
-    obj.status = 'error';
-    callback();
+    result.status = 'error';
+    callback && callback(result);
   };
 
   xhr.onabort = xhr.onerror;
   xhr.ontimeout = xhr.onerror;
 
   if (method === 'POST') {
-    xhr.setRequestHeader('Content-Type', content_type);
+    xhr.setRequestHeader('Content-Type', content_type || 'application/json');
     xhr.send(data);
   }
   if (method === 'GET') {
     xhr.send(null);
   }
-  return obj;
+  return result;
 };

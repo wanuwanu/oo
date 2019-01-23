@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>format JSON</title>
+  <style>
+    textarea {
+      width: 1000px;
+      height: 20em;
+    }
+  </style>
+</head>
+
+
+<body>
+  <div>JSONを整形します</div>
+  <div>
+    <textarea id="input" name="input" placeholder="JSONデータを入力して下さい">
+[{ "id": "1", "name": "まどか", "color": "桃" }, { "id": "2", "name": "ほむら", "color": "黒" }, { "id": "3", "name": "ともえ", "color": "黄" }, { "id": "4", "name": "あんず", "color": "赤" }, { "id": "5", "name": "助六", "color": "青" }]
+    </textarea>
+  </div>
+  <br>
+  <div>
+    <button id="clear">クリア</button>
+    <button id="format1">改行なし</button>
+    <button id="format2">要素改行</button>
+    <button id="format3">配列整形</button>
+  </div>
+  <br>
+  <div>
+    <textarea id="output" name="output" placeholder="JSONデータが表示されます"></textarea>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const input = document.getElementById("input");
+      const output = document.getElementById("output");
+
+      const clear_button = document.getElementById("clear");
+      clear_button.onclick = function () {
+        input.value = '';
+        output.value = '';
+      };
+
+      const button1 = document.getElementById("format1");
+      button1.onclick = function () {
+        output.value = '';
+        const json = JSON.parse(input.value);
+        console.log(json);
+        output.value = JSON.stringify(json);
+      };
+
+      const button2 = document.getElementById("format2");
+      button2.onclick = function () {
+        output.value = '';
+        const json = JSON.parse(input.value);
+        console.log(json);
+        output.value = JSON.stringify(json, null, 2);
+      };
+
+      var r = '\n';
+      var cr = ',\n';
+      var sp2 = '  ';
+
+      var stringify0 = function (obj, sp, in_array) {
+        in_array = in_array || false;
+        sp = sp || '';
+        var s = '';
+
+        if (obj === null) return 'null';
+
+        if (typeof obj !== 'object') {
+          if (typeof obj === 'string') {
+            return '"' + obj + '"';
+          } else {
+            return obj;
+          }
+        }
+
+        if (Array.isArray(obj)) {
+          var p = '';
+          s += '[' + r;
+          for (var x of obj) {
+            s += p + sp + sp2 + stringify0(x, sp + sp2, true);
+            p = cr;
+          }
+          s += r + sp + ']';
+        } else {
+          if (in_array) {
+            var p = '';
+            s += '{';
+            var key_array = Object.keys(obj);
+            for (var key of key_array) {
+              s += p + '"' + key + '":' + stringify0(obj[key], sp + sp2, in_array);
+              p = ',';
+            }
+            s += '}';
+          } else {
+            var p = '';
+            s += '{' + r;
+            var key_array = Object.keys(obj);
+            for (var key of key_array) {
+              s += p + sp + sp2 + '"' + key + '": ' + stringify0(obj[key], sp + sp2, in_array);
+              p = cr;
+            }
+            s += r + sp + '}';
+          }
+        }
+        return s;
+      };
+
+      const button3 = document.getElementById("format3");
+      button3.onclick = function () {
+        output.value = '';
+        const json = JSON.parse(input.value);
+        console.log(json);
+        output.value = stringify0(json);
+      };
+
+    }, false);
+  </script>
+</body>
+
+</html>
