@@ -15,18 +15,17 @@ class OoStopMotion {
     this.position = new Oo2DVector(0);
   }
 
-  asyncLoadImage(proceeder) {
+  asyncLoadImage(callback) {
     var n = this.image_files.length;
     this.total_frames = n;
 
     var self = this;
-    oo.parallel(function* (p) {
+    oo.parallel(function* () {
       for (let i = 0; i < n; i++) {
         var path_name = oo.addPath(self.image_base_path, self.image_files[i]);
-        self.images[i] = oo.asyncCreateImage(path_name, p);
-        yield;
+        self.images[i] = yield oo.gnCreateImage(path_name);
       }
-    }, proceeder);
+    }, callback);
   }
 
   start() {

@@ -8,13 +8,15 @@ oo.env.main_proc = null;
 
 oo.qq = function (v, value) { return (v !== void 0) ? v : value; };
 oo.isObject = function (obj) { return (typeof obj === 'object') && (obj !== null) && !Array.isArray(obj); };
+oo.isArray = function (obj) { return Array.isArray(obj); };
+oo.isFunction = function (obj) { return typeof obj === 'function'; };
 
 // ex.
 // oo.each(array, 'method');
 // oo.each(array, 'method', arg);
 // oo.each(array, (e, i, a) => { });
 oo.each = function (array, func, ...args) {
-  if(!Array.isArray(array)) return;
+  if (!Array.isArray(array)) return;
   if (typeof func === 'string') {
     for (var x of array) x[func].apply(x, args);
   }
@@ -48,51 +50,6 @@ oo.deepClone = function (obj) {
     for (var key of key_array) object[key] = oo.deepClone(obj[key]);
     return object;
   }
-};
-
-oo.setupQuery = function () {
-  var $elements = {};
-
-  var $ = function (tag, args, style) {
-    // get element by id
-    // ex.
-    // ('#id')
-    var element;
-    if (tag.charAt(0) === '#') {
-      var id = tag.substr(1);
-      element = document.getElementById(id);
-      return element ? element : ($elements[id] ? $elements[id] : null);
-    }
-    // create & append
-    // ex.
-    // ('@text')
-    // ('tag')
-    // ('tag', 'id')
-    // ('tag', 'id', style)
-    // ('tag', {property, style})
-    if (tag.charAt(0) === '@') {
-      return document.createTextNode(tag.substr(1));
-    } else {
-      element = document.createElement(tag);
-      if (typeof args !== 'undefined') {
-        if (typeof args === 'string') {
-          if (args) $elements[element.id = args] = element;
-          if (oo.isObject(style)) Object.assign(element.style, style);
-        } else {
-          if (oo.isObject(args.property)) Object.assign(element, args.property);
-          if (oo.isObject(args.style)) Object.assign(element.style, args.style);
-          if (element.id) $elements[element.id] = element;
-        }
-      }
-      return element;
-    }
-  };
-
-  Node.prototype.$ = function (tag, id, style) {
-    return this.appendChild($(tag, id, style));
-  };
-
-  return $;
 };
 
 oo.main = function (main_proc) {

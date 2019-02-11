@@ -16,7 +16,6 @@
   </style>
 </head>
 
-
 <body>
   <div>JSONを整形します</div>
   <div>
@@ -42,6 +41,17 @@
       const input = document.getElementById("input");
       const output = document.getElementById("output");
 
+      const getJsonObj = function () {
+        try {
+          const obj = JSON.parse(input.value);
+          console.log(obj);
+          return obj;
+        }
+        catch (error) {
+          alert(error);
+        }
+      }
+
       const clear_button = document.getElementById("clear");
       clear_button.onclick = function () {
         input.value = '';
@@ -51,76 +61,57 @@
       const button1 = document.getElementById("format1");
       button1.onclick = function () {
         output.value = '';
-        const json = JSON.parse(input.value);
-        console.log(json);
-        output.value = JSON.stringify(json);
+        const obj = getJsonObj();
+        if (obj) output.value = JSON.stringify(obj);
       };
 
       const button2 = document.getElementById("format2");
       button2.onclick = function () {
         output.value = '';
-        const json = JSON.parse(input.value);
-        console.log(json);
-        output.value = JSON.stringify(json, null, 2);
-      };
-
-      var r = '\n';
-      var cr = ',\n';
-      var sp2 = '  ';
-
-      var stringify0 = function (obj, sp, in_array) {
-        in_array = in_array || false;
-        sp = sp || '';
-        var s = '';
-
-        if (obj === null) return 'null';
-
-        if (typeof obj !== 'object') {
-          if (typeof obj === 'string') {
-            return '"' + obj + '"';
-          } else {
-            return obj;
-          }
-        }
-
-        if (Array.isArray(obj)) {
-          var p = '';
-          s += '[' + r;
-          for (var x of obj) {
-            s += p + sp + sp2 + stringify0(x, sp + sp2, true);
-            p = cr;
-          }
-          s += r + sp + ']';
-        } else {
-          if (in_array) {
-            var p = '';
-            s += '{';
-            var key_array = Object.keys(obj);
-            for (var key of key_array) {
-              s += p + '"' + key + '":' + stringify0(obj[key], sp + sp2, in_array);
-              p = ',';
-            }
-            s += '}';
-          } else {
-            var p = '';
-            s += '{' + r;
-            var key_array = Object.keys(obj);
-            for (var key of key_array) {
-              s += p + sp + sp2 + '"' + key + '": ' + stringify0(obj[key], sp + sp2, in_array);
-              p = cr;
-            }
-            s += r + sp + '}';
-          }
-        }
-        return s;
+        const obj = getJsonObj();
+        if (obj) output.value = JSON.stringify(obj, null, 2);
       };
 
       const button3 = document.getElementById("format3");
       button3.onclick = function () {
         output.value = '';
-        const json = JSON.parse(input.value);
-        console.log(json);
-        output.value = stringify0(json);
+        const obj = getJsonObj();
+        if (obj) output.value = stringifyEx(obj, '', false);
+      };
+
+      const stringifyEx = function (obj, sp, in_array) {
+
+        const sp2 = '  ';
+
+        if (typeof obj !== 'object') {
+          if (typeof obj === 'string') return '"' + obj + '"';
+          return '' + obj;
+        }
+
+        if (obj === null) return 'null';
+
+        // 配列内の非object要素は改行しないで一行にまとめる
+        // 配列内のobject要素は改行するが、その中では改行しないで一行にまとめる
+
+        if (Array.isArray(obj)) {
+          if (obj.length === 0) return '[]';
+
+          const one_line = obj.every(x => (typeof x !== 'object') || (x === null) || (Object.keys(x).length === 0));
+
+          if (in_array || one_line) {
+            return '[' + obj.map(x => stringifyEx(x, sp + sp2, true)).join(', ') + ']';
+          } else {
+            return '[\n' + obj.map(x => sp + sp2 + stringifyEx(x, sp + sp2, true)).join(',\n') + '\n' + sp + ']';
+          }
+        } else {
+          const key_array = Object.keys(obj);
+          if (key_array.length === 0) return '{}';
+          if (in_array) {
+            return '{ ' + key_array.map(key => '"' + key + '": ' + stringifyEx(obj[key], sp + sp2, in_array)).join(', ') + ' }';
+          } else {
+            return '{\n' + key_array.map(key => sp + sp2 + '"' + key + '": ' + stringifyEx(obj[key], sp + sp2, in_array)).join(',\n') + '\n' + sp + '}';
+          }
+        }
       };
 
     }, false);
