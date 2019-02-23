@@ -5,7 +5,7 @@
 
 var oo = oo || {};
 
-oo.nsync = function (callback) {
+oo.postpone = function (callback) {
   // setTimeout(callback, 0); は4msの制限があるため
   // gif 1x1
   var img = new Image();
@@ -14,28 +14,49 @@ oo.nsync = function (callback) {
   img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 };
 
-// oo.GenNode
-//   Promiseの機能縮小版
+// oo.UnitNode
+//
 // ex.
-// var gn = new oo.GenNode(function (completion_callback) { });
-oo.GenNode = class {
-  constructor(executor) {
-    this.done = false;
-    this.result = void 0;
-    this.target = void 0;
-    // Promise.resolve に近い機能
-    var callback = (result) => {
-      this.done = true;
+// var nn = new oo.UnitNode(function (completion_callback) { });
+// 
+oo.UnitNode = class {
+  constructor(executor, auto_run = false) {
+    this.value = void 0;  // 同期部分のreturnで返す値
+    this.result = void 0; // 非同期部分のcallbackで返す値
+
+    this._done = false;
+    this._target = void 0;
+    this._executor = executor;
+    this._callback = (result) => {
+      this._done = true;
       this.result = result;
-      if (this.target) this.connect(this.target);
+      if (this._target) this.connect(this._target);
     };
-    this.value = executor(callback);
+    if (auto_run) this.run();
   }
-  // Promise.then に近い機能だがチェーンは実装しない
+
+  run() {
+    this.value = this._executor(this._callback);
+  }
+
   connect(target) {
-    this.done ? target(this.result) : this.target = target;
+    if (target instanceof oo.UnitNode) {
+      var unit_node = target;
+      target = () => { unit_node.run(); };
+    }
+    this._done ? target(this.result) : this._target = target;
   }
 };
+
+// 即実行タイプ
+// oo.serial oo.parallel ではこちらを使うこと
+oo.UnitNodeX = class extends oo.UnitNode {
+  constructor(executor) {
+    super(executor, true);
+  }
+};
+
+
 
 // oo.serial oo.parallel
 //
@@ -53,20 +74,19 @@ oo.GenNode = class {
 // });
 //
 // var nsyncFunction = function () {
-//   return new oo.GenNode(done => {
+//   return new oo.UnitNode(done => {
 //     setTimeout(done, 0);
 //   });
 // };
 
 oo.serial = function (generator, completion) {
-  return new oo.GenNode(done => {
+  return new oo.UnitNode(done => {
     var y = void 0;
     var g = generator();
     var proceed = () => {
-      oo.nsync(() => {
+      oo.postpone(() => {
         var r = g.next(y);
-        y = (r.value instanceof oo.GenNode) ? (r.value.connect(proceed), r.value.value) : r.value;
-        // y = oo.isObject(r.value) ? (r.value.connect(proceed), r.value.value) : r.value;
+        y = (r.value instanceof oo.UnitNode) ? (r.value.connect(proceed), r.value.value) : r.value;
         if (r.done) {
           completion && completion();
           done();
@@ -78,11 +98,11 @@ oo.serial = function (generator, completion) {
 };
 
 oo.parallel = function (generator, completion) {
-  return new oo.GenNode(done => {
+  return new oo.UnitNode(done => {
     var n = 0;
     var g = generator();
     var proceed = () => {
-      oo.nsync(() => {
+      oo.postpone(() => {
         if (n-- !== 0) return;
         completion && completion();
         done();
@@ -91,14 +111,14 @@ oo.parallel = function (generator, completion) {
     var y = void 0;
     do {
       var r = g.next(y);
-      y = (r.value instanceof oo.GenNode) ? (n++ , r.value.connect(proceed), r.value.value) : r.value;
+      y = (r.value instanceof oo.UnitNode) ? (n++ , r.value.connect(proceed), r.value.value) : r.value;
     } while (!r.done);
     proceed();
   });
 };
 
-oo.gnWait = function (time) {
-  return new oo.GenNode(done => {
+oo.nnWait = function (time) {
+  return new oo.UnitNode(done => {
     setTimeout(done, time);
   });
 };
@@ -112,7 +132,7 @@ oo.createImage = function (file, callback) {
 };
 
 oo.gnCreateImage = function (file, callback) {
-  return new oo.GenNode(done => {
+  return new oo.UnitNode(done => {
     return oo.createImage(file, () => {
       callback && callback();
       done();
@@ -129,7 +149,7 @@ oo.appendScript = function (file, callback) {
 };
 
 oo.gnAppendScript = function (file, callback) {
-  return new oo.GenNode(done => {
+  return new oo.UnitNode(done => {
     oo.appendScript(file, () => {
       callback && callback();
       done();
@@ -142,7 +162,7 @@ oo.loadText = function (file, callback) {
 };
 
 oo.gnLoadText = function (file, callback) {
-  return new oo.GenNode(done => {
+  return new oo.UnitNode(done => {
     oo.loadText(file, () => {
       callback && callback();
       done();
@@ -200,10 +220,3 @@ oo.ajax = function (method, url, data, content_type, callback) {
   return result;
 };
 
-
-// ここまで
-// v async -> nsync
-// oo.serial oo.parallel 仕様変更
-// asyncCreateImage  -> gnCreateImage
-// asyncAppendScript -> gnAppendScript
-// asyncLoadText     -> gnLoadText
