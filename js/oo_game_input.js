@@ -27,6 +27,8 @@ class OoGameInput {
     this._touch_on = false;
     this._touch_press = false;
     this._touch_position = new Oo2DVector(0);
+    this._touch_delta = new Oo2DVector(0);
+    this._touch_path_length = 0;
   }
 
   addStatus(status) {
@@ -66,17 +68,16 @@ class OoGameInput {
     var status = new OoGameInputStatus();
     status.touch_press = this._touch_press || this._touch_on;
     status.touch_position = this._touch_position.clone();
+    status.touch_delta = this._touch_delta.clone();
 
     this.addStatus(status);
-    // this.status_array.pop();
-    // this.status_array.unshift(status);
 
-  
     this.click_on = this._click_on;
     this.click_position = this._click_position.clone();
 
     this._touch_on = false;
     this._click_on = false;
+    this._touch_delta = new Oo2DVector(0);
   }
 
   _getEventPositionMouse(event) {
@@ -88,9 +89,6 @@ class OoGameInput {
 
   _getEventPositionTouch(event) {
     var r = this._element.getBoundingClientRect();
-    // var x = event.changedTouches[0].pageX - r.left;
-    // var y = event.changedTouches[0].pageY - r.top;
-    // return Oo2DVector.create(x, y).mul(this._scale);
     var x = (event.changedTouches[0].pageX - r.left) * this._scale;
     var y = (event.changedTouches[0].pageY - r.top) * this._scale;
     return new Oo2DVector(x, y);
@@ -115,6 +113,8 @@ class OoGameInput {
     this._touch_press = true;
     this._touch_on = true;
     this._touch_position = this._getEventPositionTouch(event);
+    this._touch_delta.set(0, 0);
+    this._touch_path_length = 0;
   }
 
   _onTouchMove(event) {
@@ -126,7 +126,10 @@ class OoGameInput {
     }
 
     if (this._touch_press) {
-      this._touch_position = this._getEventPositionTouch(event);
+      var p = this._getEventPositionTouch(event);
+      this._touch_delta.add(p).sub(this._touch_position);
+      this._touch_path_length += Oo2DVector.distance(p, this._touch_position);
+      this._touch_position = p;
     }
 
     this._touch_position = new Oo2DVector(x, y);
@@ -146,10 +149,15 @@ class OoGameInput {
     this._touch_press = true;
     this._touch_on = true;
     this._touch_position = this._getEventPositionMouse(event);
+    this._touch_delta.set(0, 0);
+    this._touch_path_length = 0;
   }
 
   _onMouseMove(event) {
-    this._touch_position = this._getEventPositionMouse(event);
+    var p = this._getEventPositionMouse(event);
+    this._touch_delta.add(p).sub(this._touch_position);
+    this._touch_path_length += Oo2DVector.distance(p, this._touch_position);
+    this._touch_position = p;
   }
 
   _onMouseUp(event) {

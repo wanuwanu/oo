@@ -7,10 +7,11 @@ oo.env.debug_log = false;
 oo.env.main_proc = null;
 oo.env.sample_text = 'The quick brown fox jumps over the lazy dog.';
 
-oo.qq = function (v, value) { return (v !== void 0) ? v : value; };
 oo.isObject = function (obj) { return (typeof obj === 'object') && (obj !== null) && !Array.isArray(obj); };
 oo.isArray = function (obj) { return Array.isArray(obj); };
 oo.isFunction = function (obj) { return typeof obj === 'function'; };
+oo.qq = function (v, value) { return (v !== void 0) ? v : value; };
+oo.xx = function (func, ...args) { func && func(...args); };
 
 // ex.
 // oo.each(array, 'method');

@@ -28,6 +28,7 @@ oo.main(() => {
     height: 'calc(100vh - 16px)',
     display: 'inline-block',
     verticalAlign: 'top',
+    resize: 'horizontal',
   };
 
   var editor_style = {
@@ -51,10 +52,10 @@ oo.main(() => {
 
   var cell_array_style = {
     position: 'absolute',
-    left: '400px',
+    display: 'inline-block',
     top: '120px',
     overflow: 'scroll',
-    width: 'calc(100vw - 400px - 8px)',
+    width: '1080px',
     height: 'calc(100vh - 130px)',
   };
 
@@ -262,7 +263,7 @@ oo.main(() => {
       for (var cell of cell_map.values()) {
         if (cell['image']) {
           const path_name = oo.addPath(layout.image_base_path, cell['image']);
-          cell.img = yield oo.gnCreateImage(path_name);
+          cell.img = yield oo.xnCreateImage(path_name);
         }
       }
     }, update);

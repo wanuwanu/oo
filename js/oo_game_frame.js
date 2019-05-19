@@ -204,6 +204,7 @@ class OoGameFrame {
         self.touch_on = true;
         self.touch_position = getEventPositionTouch(event);
         self.touch_delta.set(0, 0);
+        self.touch_path_length = 0;
       } else {
         self.touch_press = false;
       }
@@ -240,6 +241,8 @@ class OoGameFrame {
       self.touch_press = true;
       self.touch_on = true;
       self.touch_position = getEventPosition(event);
+      self.touch_delta.set(0, 0);
+      self.touch_path_length = 0;
     }
 
     function onMouseMove(event) {

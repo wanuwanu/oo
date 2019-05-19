@@ -84,7 +84,7 @@
         const sp2 = '  ';
 
         if (typeof obj !== 'object') {
-          if (typeof obj === 'string') return '"' + obj + '"';
+          if (typeof obj === 'string') return JSON.stringify(obj);
           return '' + obj;
         }
 
