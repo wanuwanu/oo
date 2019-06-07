@@ -16,8 +16,7 @@ oo.postpone = function (callback) {
 
 // oo.NNode
 // oo.XNode
-// ex.
-// var x = new oo.XNode(function (completion_callback) { });
+// ex. var x = new oo.XNode(function (completion_callback) { });
 oo.NNode = class {
   constructor(executor) {
     this.value = void 0;  // 同期部分のreturnで返す値
