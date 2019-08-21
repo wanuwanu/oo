@@ -46,18 +46,19 @@ oo.sigmoid = function (x) {
   return 1.0 / (1.0 + Math.exp(- x));
 };
 
-// シグモイド関数の区間[-a,a]を利用した補間パラメータ
-// [-a,a]の範囲が、xの範囲[0,1]になり、0.0～1.0を返す
+// シグモイド関数の区間[-1,1]を利用した補間パラメータ
+// [-1,1]の範囲が、引数xでの範囲[0,1]になり、0.0～1.0を返す
 // aは1以上を指定(6程度が通常、1では線形補間に近くなる)
 oo.sigmoidStep = function (x, a) {
-  if (x <= 0.0) return 0.0;
-  if (x >= 1.0) return 1.0;
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
 
-  var t = 2.0 * x - 1.0;
-  var s = 1.0 / (1.0 + Math.exp(- t * a));
+  var t = 2 * x - 1;
+  var s = 1 / (1 + Math.exp(- t * a));
 
+  // 出力が[0,1]になるようにスケーリング
   var ea = Math.exp(- a);
-  var k = (1.0 + ea) / (1 - ea);
+  var k = (1 + ea) / (1 - ea);
 
   return k * (s - 0.5) + 0.5;
 };

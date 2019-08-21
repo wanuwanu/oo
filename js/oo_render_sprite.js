@@ -5,20 +5,16 @@ class OoRenderSprite extends OoSprite {
   constructor(image) {
     super();
     if (image && image instanceof Image) {
-      this.size.set(image.width, image.height);
-
-      this.canvas = document.createElement('canvas');
-      this.canvas.width = image.width;
-      this.canvas.height = image.height;
-      this.canvas_context = this.canvas.getContext('2d');
-      this.canvas_context.drawImage(image, 0, 0);
-      this.image_data = this.canvas_context.getImageData(0, 0, image.width, image.height);
-      this.pixel = this.image_data.data;
-      this.image = this.canvas;
+      this.createFromImage(image);
     }
   }
 
   create(width, height) {
+    this.createWithSize(width, height);
+    console.log('OoRenderSprite.create is deprecated.');
+  }
+
+  createWithSize(width, height) {
     this.size.set(width, height);
     this.canvas = document.createElement('canvas');
     this.canvas.width = width;
@@ -29,7 +25,15 @@ class OoRenderSprite extends OoSprite {
     this.image = this.canvas;
   }
 
-  getCanvasImageData(){
+  createFromImage(image) {
+    this.createWithSize(image.width, image.height);
+    this.canvas_context.drawImage(image, 0, 0);
+    this.image_data = this.canvas_context.getImageData(0, 0, image.width, image.height);
+    this.pixel = this.image_data.data;
+    this.image = this.canvas;
+  }
+
+  getCanvasImageData() {
     return this.canvas_context.getImageData(0, 0, this.canvas.width, this.canvas.height);
   }
 

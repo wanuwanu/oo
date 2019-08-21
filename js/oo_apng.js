@@ -12,10 +12,11 @@ oo.asyncCreateApng = function (url, callback) {
   xhr.open('GET', url, true);
   xhr.responseType = 'arraybuffer';
   xhr.onload = () => {
-    apng.create(xhr.response);
-    callback && callback();
+    apng.create(xhr.response, callback);
   };
-  xhr.onerror = () => { callback && callback(); };
+  xhr.onerror = () => {
+    oo.xx(callback);
+  };
   xhr.onabort = xhr.onerror;
   xhr.ontimeout = xhr.onerror;
   xhr.send();
@@ -46,12 +47,15 @@ class OoApng extends OoRenderSprite {
     }
   }
 
-  create(array_buffer) {
+  create(array_buffer, callback) {
     var buffer = new Uint8Array(array_buffer);
 
     // check png signature
     for (var i = 0; i < oo.apng.png_signature.length; i++) {
-      if (buffer[i] !== oo.apng.png_signature[i]) return false;
+      if (buffer[i] !== oo.apng.png_signature[i]) {
+        oo.xx(callback);
+        return false;
+      }
     }
 
     // scan chunk
@@ -60,18 +64,23 @@ class OoApng extends OoRenderSprite {
     });
 
     if (this.is_apng) {
-      this._createApngImage(buffer);
+      this._createApngImage(buffer, callback);
     } else {
-      this._createPngImage(buffer);
+      this._createPngImage(buffer, callback);
     }
   }
 
-  _createPngImage(buffer) {
+  _createPngImage(buffer, callback) {
     var blob = new Blob([buffer], { 'type': 'image/png' });
     this.image = new Image();
     this.image.src = URL.createObjectURL(blob);
-    this.image.onload = function () { };
-    this.image.onerror = function () { oo.log('oo_apng : create error'); };
+    this.image.onload = function () {
+      oo.xx(callback);
+    };
+    this.image.onerror = function () {
+      oo.log('oo_apng : create error');
+      oo.xx(callback);
+    };
 
     // scan chunk
     this._scanChunks(buffer, 8, (type, position, length) => {
@@ -83,8 +92,8 @@ class OoApng extends OoRenderSprite {
     this.size.set(this.width, this.height);
   }
 
-  _createApngImage(buffer) {
-    var data = [];
+  _createApngImage(buffer, callback) {
+    var data = []; // buffer内での位置と長さの情報
     var func_table = {};
 
     func_table['IHDR'] = (pos, length) => {
@@ -130,31 +139,47 @@ class OoApng extends OoRenderSprite {
       }
     });
 
-    // create images
-    for (var i = 0; i < this.frames.length; i++) {
-      var frame = this.frames[i];
-      var blob_array = [];
-      blob_array.push(oo.apng.png_signature);
-
-      var u8 = this.makeU8(buffer, this.header);
-      this.writeUint32(u8, 0, frame.width);
-      this.writeUint32(u8, 4, frame.height);
-      blob_array.push(this.makeChunk('IHDR', u8, 0, u8.length));
-
-      for (var j = 0; j < data.length; j++) blob_array.push(this.makeU8(buffer, data[j]));
-      for (var j = 0; j < frame.data.length; j++) {
-        blob_array.push(this.makeChunk('IDAT', buffer, frame.data[j].pos, frame.data[j].length));
-      }
-      blob_array.push(this.makeChunk('IEND', null, 0, 0));
-      var blob = new Blob(blob_array, { 'type': 'image/png' });
-
-      frame.img = new Image();
-      frame.img.src = URL.createObjectURL(blob);
-      frame.img.onload = function () { };
-      frame.img.onerror = function () { oo.log('oo_apng : create error'); };
-    }
-
+    this._createFrameImages(buffer, data, callback);
     super.create(this.width, this.height);
+  }
+
+  _createFrameImages(buffer, data, callback) {
+    // 各イメージ作成が非同期処理であるため、
+    // 全体としても非同期処理を行う
+    var xnCreateFrameImage = (frame, callback) => {
+      return oo.xn((frame, callback) => {
+        var blob_array = [];
+        // signature
+        blob_array.push(oo.apng.png_signature);
+        // IHDR chunk
+        var u8 = this.makeU8(buffer, this.header);
+        this.writeUint32(u8, 0, frame.width);
+        this.writeUint32(u8, 4, frame.height);
+        blob_array.push(this.makeChunk('IHDR', u8, 0, u8.length));
+        // chunk
+        for (let d of data) blob_array.push(this.makeU8(buffer, d));
+        // IDAT chunk
+        for (let d of frame.data) blob_array.push(this.makeChunk('IDAT', buffer, d.pos, d.length));
+        // IEND chunk
+        blob_array.push(this.makeChunk('IEND', null, 0, 0));
+        // 画像生成
+        var blob = new Blob(blob_array, { 'type': 'image/png' });
+        frame.img = new Image();
+        frame.img.src = URL.createObjectURL(blob);
+        frame.img.onload = () => { oo.xx(callback); };
+        frame.img.onerror = () => {
+          oo.log('oo_apng : create error');
+          oo.xx(callback);
+        };
+      }, frame, callback);
+    };
+
+    var self = this;
+    oo.serial(function* () {
+      for (let frame of self.frames) {
+        yield xnCreateFrameImage(frame);
+      }
+    }, () => { oo.xx(callback); });
   }
 
   makeU8(buffer, data) {

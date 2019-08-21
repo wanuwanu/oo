@@ -27,16 +27,16 @@ oo.NNode = class {
     this._callback = (result) => {
       this.result = result; // executorの返す値を保存
       this._done = true;
-      for (var t of this._target) this._sendTo(t);
+      for (var t of this._target) this._transmit(t);
     };
   }
-  _sendTo(target) {
+  _transmit(target) {
     if (target instanceof oo.NNode) target.exec();
     if (typeof target === 'function') target(this.result);
   }
   connect(target) {
     if (this._target.indexOf(target) < 0) this._target.push(target);
-    this._done && this._sendTo(target);
+    this._done && this._transmit(target);
   }
   exec() {
     this.value = this._executor(this._callback);

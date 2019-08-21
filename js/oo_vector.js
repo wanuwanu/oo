@@ -382,6 +382,36 @@ class Oo3DVector {
     return v;
   }
 
+  static rotateX(rotation_x, v) {
+    var s = Math.sin(rotation_x);
+    var c = Math.cos(rotation_x);
+    var r = new Oo3DVector(0, 0, 0);
+    r.x = v.x;
+    r.y = c * v.y - s * v.z;
+    r.z = s * v.y + c * v.z;
+    return r;
+  }
+
+  static rotateY(rotation_y, v) {
+    var s = Math.sin(rotation_y);
+    var c = Math.cos(rotation_y);
+    var r = new Oo3DVector(0, 0, 0);
+    r.x = c * v.x + s * v.z;
+    r.y = v.y;
+    r.z = - s * v.x + c * v.z;
+    return r;
+  }
+
+  static rotateZ(rotation_z, v) {
+    var s = Math.sin(rotation_z);
+    var c = Math.cos(rotation_z);
+    var r = new Oo3DVector(0, 0, 0);
+    r.x = c * v.x - s * v.y;
+    r.y = s * v.x + c * v.y;
+    r.z = v.z;
+    return r;
+  }
+
   static create(x, y, z) {
     return new Oo3DVector(x, y);
   }

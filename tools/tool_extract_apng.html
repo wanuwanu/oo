@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>oo Extract Apng</title>
+</head>
+
+<body>
+  <script src="../js/concat/oo.js"></script>
+
+  <div>
+    <input type="file" id="load" accept="image/png">
+  </div>
+  <br>
+  <div>
+    <button id="clear">クリア</button>
+  </div>
+  <br>
+  <div>
+    <button id="save">保存</button>
+  </div>
+  <br>
+  <div>
+    <canvas id="canvas"></canvas>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var images = [];
+
+      // キャンバス更新
+      var update = function () {
+        var num_x = 5;
+        var max_width = 0;
+        var max_height = 0;
+        for (var img of images) {
+          max_width = Math.max(max_width, img.width);
+          max_height = Math.max(max_height, img.height);
+        }
+        max_width *= 1.2;
+        max_height *= 1.5;
+        // 描画スケールを求める
+        var cw = Math.min(max_width * num_x, window.innerWidth);
+        var s = cw / (max_width * num_x);
+        // キャンバスサイズを変更
+        canvas.width = cw;
+        canvas.height = max_height * s * Math.ceil(images.length / num_x);
+
+        // 画像を描画
+        var ctx = canvas.getContext('2d');
+        var i = 0;
+        for (let y = 0; y < Math.ceil(images.length / num_x); y++) {
+          for (let x = 0; x < num_x; x++) {
+            var img = images[i++];
+            ctx.drawImage(img, x * max_width * s, y * max_height * s, img.width * s, img.height * s);
+            if(i >= images.length) break;
+          }
+        }
+      };
+
+      // 画像のロード
+      var loadImageListener = (e) => {
+        for (var file of e.target.files) {
+          var reader = new FileReader();
+          var obj = { filename: file.name, reader };
+
+          reader.onload = function () {
+            var apng = new OoApng();
+            apng.create(this.result, () => {
+              var n = apng.frames.length;
+              for (let i = 0; i < n; i++) {
+                var m = images.length;
+                images[m] = apng.frames[i].img;
+                images[m].filename = this.p_obj.filename;
+              }
+              update();
+            });
+          };
+          reader.p_obj = obj;
+          reader.readAsArrayBuffer(file);
+        }
+      };
+
+      // クリア
+      var button_clear = document.getElementById("clear");
+      button_clear.onclick = function () {
+        document.getElementById("load").value = '';
+        images.length = 0;
+        update();
+      };
+
+      var getNonExtension = function (filename) {
+        var pos = filename.lastIndexOf('.');
+        if (pos < 0) return filename;
+        return filename.substr(0, pos);
+      };
+
+      var getValueF = function (name, default_value) {
+        var v = document.getElementById(name).value;
+        var f = Number.parseFloat(v);
+        if (!Number.isFinite(f)) f = default_value;
+        return f;
+      };
+
+      var getValueI = function (name, default_value) {
+        var v = document.getElementById(name).value;
+        var i = Number.parseInt(v);
+        if (!Number.isInteger(i)) i = default_value;
+        return i;
+      };
+
+
+      // 画像内の矩形サイズでcanvasをリサイズして描画
+      // rect: { x, y, w, h }
+      var resizeCanvasDrawImage = function (canvas_name, image, rect, scale) {
+        var canvas = document.getElementById(canvas_name);
+        canvas.width = rect.w * scale;
+        canvas.height = rect.h * scale;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w * scale, rect.h * scale);
+      };
+
+      // ext 'jpg' or ' png'
+      var saveCanvasImage = function (canvas_name, file_name, ext, quality) {
+        var canvas = document.getElementById(canvas_name);
+        var link = document.createElement('a');
+        if (ext === 'jpg') link.href = canvas.toDataURL('image/jpeg', quality);
+        if (ext === 'png') link.href = canvas.toDataURL('image/png');
+        link.download = file_name + '.' + ext;
+        link.click();
+      };
+
+      var extractImages = function (images, saveProc) {
+        function* gen(p) {
+          var n = 0;
+          for (var img of images) {
+            saveProc(img, { x: 0, y: 0, w: img.width, h: img.height }, n++);
+            yield p();
+          }
+        }
+        var g = gen(() => { setTimeout(() => { g.next(); }, 100); });
+        g.next();
+      };
+
+      // 書き出し
+      var button_save = document.getElementById("save");
+      button_save.onclick = function () {
+        var saveImagePng = function (img, rect, n) {
+          resizeCanvasDrawImage('canvas', img, rect, 1.0);
+          saveCanvasImage('canvas', getNonExtension(img.filename) + '_' + oo.zeroPadding(n, 6), 'png');
+        };
+        extractImages(images, saveImagePng);
+      };
+
+      // 画像選択ボタンのイベントリスナー登録
+      var files = document.getElementById("load");
+      files.addEventListener('change', loadImageListener, false);
+    }, false);
+  </script>
+
+</body>
+
+</html>

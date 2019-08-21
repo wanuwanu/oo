@@ -2,7 +2,7 @@
 // Released under the MIT license http://opensource.org/licenses/mit-license.php
 
 oo.main(() => {
-  var $ = oo.$();
+  var $ = oo.$;
 
   // デフォルトの設定
   var app = app || {};
@@ -11,22 +11,11 @@ oo.main(() => {
   app.display_scale = 120; //(n/360で指定)
   app.filename = 'layout.json';
 
-  // CSS
-  var style = document.createElement('style');
-  document.head.appendChild(style);
-  var sheet = style.sheet;
-
-  sheet.insertRule('#editor ul li {list-style: none;margin-left: -40px;padding: 2px;}', sheet.cssRules.length);
-  sheet.insertRule('#editor ul {margin: 2px;}', sheet.cssRules.length);
-  sheet.insertRule('#editor label {margin-right: 10px;width: 40px;float: left;}', sheet.cssRules.length);
-  sheet.insertRule('div.cell1 {display: inline-block;vertical-align: top; }', sheet.cssRules.length);
-  sheet.insertRule('div.cell2 {display: inline-block;width: 1000px;}', sheet.cssRules.length);
-
   var preview_style = {
-    overflow: 'scroll',
-    width: 'calc(400px - 16px)',
-    height: 'calc(100vh - 16px)',
     display: 'inline-block',
+    overflow: 'scroll',
+    width: 'calc(400px - 24px)',
+    height: 'calc(100vh - 24px)',
     verticalAlign: 'top',
     resize: 'horizontal',
   };
@@ -35,7 +24,6 @@ oo.main(() => {
     position: 'absolute',
     display: 'inline-block',
     verticalAlign: 'top',
-    margin: '6px',
     width: '1000px',
   };
 
@@ -48,138 +36,120 @@ oo.main(() => {
   var sub_panel_style = {
     display: 'inline-block',
     verticalAlign: 'top',
+    margin: '2px',
   };
 
   var cell_array_style = {
     position: 'absolute',
     display: 'inline-block',
-    top: '120px',
-    overflow: 'scroll',
+    overflowY: 'scroll',
     width: '1080px',
-    height: 'calc(100vh - 130px)',
+    height: 'calc(100vh - 114px)',
+    margin: '2px',
   };
 
   var cell_style = {
     background: 'linear-gradient(#fcfcfc, #eeeeee)',
-    padding: '5px',
-    marginTop: '5px',
-    marginBottom: '5px',
     display: 'table',
     width: '1040px',
+    margin: '5px',
   };
 
   var cell_label_style = {
     marginLeft: '10px',
+    verticalAlign: 'middle',
   };
 
   var cell_input_style = {
-    margin: '2px',
     verticalAlign: 'middle',
+    margin: '2px',
+  };
+
+  var lb_style1 = {
+    marginRight: '10px',
+    verticalAlign: 'middle',
+    width: '40px',
+    float: 'left'
   };
 
   // DOM構築
   // プレビュー画面
-  $({ tag: 'div', id: 'preview', style: preview_style });
-
-  $({ tag: 'canvas', id: 'canvas' });
+  $(document.body,
+    $({ tag: 'div', id: 'preview', style: preview_style },
+      { tag: 'canvas', id: 'canvas' }
+    ));
   $('#canvas').style.background = '#000';
-
-  $('#preview', $('#canvas'));
-  $(document.body, $('#preview'));
 
   // 編集画面
   $({ tag: 'div', id: 'editor', style: editor_style });
-
+  // 表示画面
   panel_style['background'] = 'linear-gradient(#ffffff, #ddeeff)';
   $({ tag: 'div', id: 'panel_1', style: panel_style });
-
-  $('#panel_1', { tag: 'div', id: 'panel_1a', style: sub_panel_style }, 'div', '@表示画面サイズ');
-  $('#panel_1a', { tag: 'ul', id: 'panel_1_ul' }, [
-    $('li', [
-      $('label', '@width'),
-      { tag: 'input', id: 'd_width', style: { width: '80px' } }
-    ]),
-    $('li', [
-      $('label', '@height'),
-      { tag: 'input', id: 'd_height', style: { width: '80px' } }
-    ])
-  ]);
-
-  $('#panel_1', { tag: 'div', id: 'panel_1b', style: sub_panel_style }, 'div', '@表示比率');
-  $('#panel_1b', { tag: 'div', style: { margin: '2px', padding: '2px' } },
-    { tag: 'select', id: 'scale_select', style: { padding: '2px' } });
-
+  $('#panel_1', $({ tag: 'div', style: sub_panel_style },
+    $('div', '表示画面サイズ'),
+    $('div', $({ tag: 'label', style: lb_style1 }, 'width'), { tag: 'input', id: 'd_width', style: { width: '80px' } }),
+    $('div', $({ tag: 'label', style: lb_style1 }, 'height'), { tag: 'input', id: 'd_height', style: { width: '80px' } })
+  ));
+  $('#panel_1', $({ tag: 'div', style: sub_panel_style },
+    $('div', '表示比率'),
+    $('div', $({ tag: 'select', id: 'scale_select', style: { padding: '2px' } }))
+  ));
   var scale_list = [
     ['45', '1/8倍'],
     ['90', '1/4倍(25%)'],
     ['120', '1/3倍'],
     ['180', '1/2倍(50%)'],
-    ['360', '等倍(100%)'],
+    ['360', '等倍(100%)', true],
     ['720', '2倍(200%)'],
     ['1080', '3倍(300%)'],
     ['1140', '4倍(400%)'],
     ['2880', '8倍(800%)'],
   ];
-
   for (var i of scale_list) {
     $('#scale_select', { tag: 'option', id: 'scale_select_option' + i });
     var e = $('#scale_select_option' + i);
-    if (i[0] === '360') e.selected = true;
     e.value = i[0];
-    $(e, '@' + i[1]);
+    $(e, i[1]);
+    if (i[2]) e.selected = true;
   }
-
+  // 仮想画面
   panel_style['background'] = 'linear-gradient(#ffffff, #ddffee)';
   $({ tag: 'div', id: 'panel_2', style: panel_style });
-  $('#panel_2', 'div', '@仮想画面サイズ');
-  $('#panel_2', { tag: 'ul', id: 'panel_2_ul' });
-  $('#panel_2_ul', { tag: 'li', id: 'li_v_width' }, 'label', '@width');
-  $('#panel_2_ul', { tag: 'li', id: 'li_v_height' }, 'label', '@height');
-  $('#li_v_width', { tag: 'input', id: 'v_width', style: { width: '80px' } });
-  $('#li_v_height', { tag: 'input', id: 'v_height', style: { width: '80px' } });
-
+  $('#panel_2', $('div', '仮想画面サイズ'));
+  $('#panel_2', $('div', $({ tag: 'label', style: lb_style1 }, 'width'), { tag: 'input', id: 'v_width', style: { width: '80px' } }));
+  $('#panel_2', $('div', $({ tag: 'label', style: lb_style1 }, 'height'), { tag: 'input', id: 'v_height', style: { width: '80px' } }));
+  // レイアウトファイル入出力
   panel_style['background'] = 'linear-gradient(#ffffff, #ffeedd)';
   $({ tag: 'div', id: 'panel_3', style: panel_style });
-  $('#panel_3', 'div', '@ファイル');
-  $('#panel_3', { tag: 'ul', id: 'panel_3_ul' });
-  $('#panel_3_ul', 'li', { tag: 'input', property: { id: 'load', type: 'button', value: 'レイアウト読み込み' } });
-  $('#panel_3_ul', 'li', { tag: 'input', property: { id: 'save', type: 'button', value: 'レイアウト書き出し' } });
-
+  $('#panel_3', $('div', 'ファイル'));
+  $('#panel_3', $('div', { tag: 'input', id: 'load', type: 'button', value: 'レイアウト読み込み' }));
+  $('#panel_3', $('div', { tag: 'input', id: 'save', type: 'button', value: 'レイアウト書き出し' }));
+  // 設定
   panel_style['background'] = 'linear-gradient(#ffffff, #ffddee)';
   $({ tag: 'div', id: 'panel_4', style: panel_style });
-  $('#panel_4', 'div', '@設定');
-  $('#panel_4', { tag: 'ul', id: 'panel_4_ul' });
-  $('#panel_4_ul', { tag: 'li', id: 'li_layout_name' }, { tag: 'label', style: { width: '140px' } }, '@レイアウトファイル名');
-  $('#panel_4_ul', { tag: 'li', id: 'li_image_base_path' }, { tag: 'label', style: { width: '140px' } }, '@画像ベースフォルダ');
-
-  $('#li_layout_name', {
-    tag: 'input',
-    property: { id: 'layout_name', type: 'text' },
-    style: { width: '250px' }
-  });
-  $('#li_image_base_path', {
-    tag: 'input',
-    property: { id: 'image_base_path', type: 'text' },
-    style: { width: '250px' }
-  });
-
+  $('#panel_4', $('div', '設定'));
+  $('#panel_4', $('div',
+    $({ tag: 'label', style: { marginRight: '10px', width: '140px', float: 'left' } }, 'レイアウトファイル名'),
+    $({ tag: 'input', id: 'layout_name', type: 'text', style: { width: '250px' } })
+  ));
+  $('#panel_4', $('div',
+    $({ tag: 'label', style: { marginRight: '10px', width: '140px', float: 'left' } }, '画像ベースフォルダ'),
+    $({ tag: 'input', id: 'image_base_path', type: 'text', style: { width: '250px' } })
+  ));
   // 要素追加ボタン
   $({ tag: 'div', id: 'append_button_area' },
-    { tag: 'div', style: { display: 'inline-block', margin: '5px', verticalAlign: 'middle' } },
-    { tag: 'input', property: { id: 'append', type: 'button', value: '要素の追加' } }
+    { tag: 'input', id: 'append', type: 'button', value: '要素の追加' }
   );
-
-  $('#editor', '#panel_1');
-  $('#editor', '#panel_2');
-  $('#editor', '#panel_3');
-  $('#editor', '#panel_4');
-  $('#editor', '#append_button_area');
-  $(document.body, '#editor');
-
   // 編集セルエリア
   $({ tag: 'div', id: 'cell_array', style: cell_array_style });
-  $(document.body, '#cell_array');
-
+  //
+  $('#editor', $('#panel_1'));
+  $('#editor', $('#panel_2'));
+  $('#editor', $('#panel_3'));
+  $('#editor', $('#panel_4'));
+  $('#editor', $('#append_button_area'));
+  $('#editor', $('#cell_array'));
+  $(document.body, $('#editor'));
   // DOM構築終わり
 
   var screen_width = app.screen_width;
@@ -406,15 +376,13 @@ oo.main(() => {
     var div = $({ tag: 'div', id: 'cell-' + cell_num, style: cell_style });
     div.setAttribute('data-cell-id', cell_num);
 
-    var cell_1 = document.createElement('div');
-    cell_1.className = 'cell1';
+    var cell_1 = $({ tag: 'div', style: { display: 'inline-block', verticalAlign: 'top' } });
     appendUI(cell_1, cell_num, '', 'checkbox', 'show');
 
-    var cell_2 = document.createElement('div');
-    cell_2.className = 'cell2';
-    var div1 = document.createElement('div');
-    var div2 = document.createElement('div');
-    var div3 = document.createElement('div');
+    var cell_2 = $({ tag: 'div', style: { display: 'inline-block', width: '1000px' } });
+    var div1 = $('div');
+    var div2 = $('div');
+    var div3 = $('div');
 
     appendUI(div1, cell_num, '名前', 'text', 'name', 80);
     appendUI(div1, cell_num, '親', 'text', 'parent', 80);
