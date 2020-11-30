@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>座標取り出しツール</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN";
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    // 追加ヘルパ関数
+    var oo = oo || {};
+    oo._$ = oo._$ || {};
+    oo._$._elements = {};
+    oo._$._getElement = function (obj) {
+      if (!obj) return null;
+      if (typeof obj === 'string') {
+        if (obj.charAt(0) === '#') {
+          const id = obj.substr(1);
+          return document.getElementById(id) || oo._$._elements[id];
+        }
+        return document.createElement(obj);
+      }
+      if (typeof obj === 'object') {
+        if (obj instanceof Node) return obj;
+        if (obj.tag) {
+          const element = document.createElement(obj.tag);
+          if (element) {
+            const key_array = Object.keys(obj);
+            for (let key of key_array) {
+              if (key !== 'tag' && key !== 'style') element[key] = obj[key];
+              if (key === 'style') Object.assign(element.style, obj.style);
+            }
+            if (element.id) oo._$._elements[element.id] = element;
+            return element;
+          }
+        }
+      }
+      return null;
+    };
+    oo.$ = function (...args) {
+      if (args.length === 0) return null;
+      const parent = oo._$._getElement(args[0]);
+      if (!parent) return null;
+      for (let i = 1; i < args.length; i++) {
+        if (typeof args[i] === 'string') {
+          parent.appendChild(document.createTextNode(args[i]));
+        } else {
+          parent.appendChild(oo._$._getElement(args[i]));
+        }
+      }
+      return parent;
+    };
+
+    // アプリ開始
+    document.addEventListener('DOMContentLoaded', function () {
+      const $ = oo.$;
+
+      const preview_style = {
+        display: 'inline-block',
+        verticalAlign: 'top',
+        margin: '2px',
+      };
+
+      const editor_style = {
+        position: 'absolute',
+        display: 'inline-block',
+        verticalAlign: 'top',
+        margin: '2px',
+      };
+
+      const div_style = {
+        margin: '5px',
+      }
+
+      const cell_array_style = {
+        position: 'absolute',
+        width: '460px',
+        margin: '2px',
+        background: 'linear-gradient(#cccccc, #cccccc)',
+        border: 'solid 1px #000000',
+      };
+
+      const cell_style = {
+        background: 'linear-gradient(#fcfcfc, #eeeeee)',
+        display: 'table',
+        width: '450px',
+        margin: '3px',
+        border: 'solid 2px rgba(0, 0, 0, 0)',
+      };
+
+      const cell_label_style = {
+        marginLeft: '10px',
+        verticalAlign: 'middle',
+      };
+
+      const cell_input_style = {
+        verticalAlign: 'middle',
+        margin: '2px',
+      };
+
+      // UI作成
+      // キャンバス
+      const canvas = $({ tag: 'canvas', id: 'canvas', style: { background: '#ccc' } });
+      // その他
+      const panel = $({ tag: 'div', id: 'panel' });
+      // ファイル選択
+      const drop_area_style = {
+        position: 'relative',
+        borderRadius: '10px',
+        width: '300px', height: '100px',
+        textAlign: 'center',
+        display: 'table-cell',
+        verticalAlign: 'middle',
+        color: '#fff',
+        background: '#3366ff',
+      };
+      const drop_input_style = {
+        position: 'absolute', left: 0, top: 0,
+        width: '100%', height: '100%',
+        opacity: 0,
+      };
+      const drop_area = $({ tag: 'div', id: 'file_drop_area', style: drop_area_style, },
+        $('label', 'ファイルを選択 or ドロップ'),
+        $({
+          tag: 'input', id: 'file_select', type: 'file', multiple: 'multiple',
+          style: drop_input_style,
+        }),
+      );
+      $(panel, drop_area);
+      // ファイルが選択された時の処理
+      $('#file_select').addEventListener('change', (e) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          target_image = new Image();
+          target_image.src = reader.result;
+          target_image.onload = () => { update(); };
+        };
+        reader.readAsDataURL(e.target.files[0]);
+      }, false);
+
+      // 情報表示
+      $({ tag: 'div', id: 'mouse_div', style: div_style });
+      const tn_mouse_x = document.createTextNode('x座標 : 0');
+      const tn_mouse_y = document.createTextNode('y座標 : 0');
+      const lb_style = { textAlign: 'right', marginRight: '10px', width: '100px' };
+      $('#mouse_div', $('div', $({ tag: 'label', style: lb_style }, tn_mouse_x)));
+      $('#mouse_div', $('div', $({ tag: 'label', style: lb_style }, tn_mouse_y)));
+      $(panel, $('#mouse_div'));
+
+      $({ tag: 'div', id: 'mode_div', style: div_style });
+      $('#mode_div', $('div', $({ tag: 'label', style: lb_style }, { tag: 'input', type: 'radio', checked: true }, '矩形追加')));
+      $('#mode_div', $('div', $({ tag: 'label', style: lb_style }, { tag: 'input', type: 'radio', checked: false, disabled: 'disabled' }, '頂点追加')));
+      $(panel, $('#mode_div'));
+
+      // テキストエリア
+      const textarea = $({ tag: 'textarea', style: { width: '300px', height: '100px' } });
+      $(panel, $('div', textarea));
+
+      // 編集セルエリア
+      $({ tag: 'div', id: 'cell_array', style: cell_array_style });
+      $(panel, $('#cell_array'));
+
+      // まとめたものを登録
+      const root = $('div');
+      $({ tag: 'div', id: 'preview', style: preview_style });
+      $({ tag: 'div', id: 'editor', style: editor_style });
+      $(root, $('#preview', canvas));
+      $(root, $('#editor', panel));
+      $(document.body, root);
+      // UI作成ここまで
+
+      // マウス座標更新
+      const update_mouse_info = (x, y) => {
+        tn_mouse_x.textContent = 'x座標 : ' + x;
+        tn_mouse_y.textContent = 'y座標 : ' + y;
+      }
+
+      let mouse_sx = 0;
+      let mouse_sy = 0;
+      let mouse_ex = 0;
+      let mouse_ey = 0;
+      let mouse_drag = false;
+
+      document.addEventListener('mousemove', e => {
+        const r = canvas.getBoundingClientRect();
+        mouse_ex = e.clientX - r.left;
+        mouse_ey = e.clientY - r.top;
+        update_mouse_info(mouse_ex, mouse_ey);
+        update();
+      });
+
+      document.addEventListener('mousedown', e => {
+        const r = canvas.getBoundingClientRect();
+        mouse_sx = e.clientX - r.left;
+        mouse_sy = e.clientY - r.top;
+        update_mouse_info(mouse_sx, mouse_sy);
+
+        if (mouse_sx >= 0 && mouse_sy >= 0 && mouse_sx < r.width && mouse_sy < r.height) {
+          mouse_drag = true;
+        }
+      });
+
+      document.addEventListener('mouseup', e => {
+        if (mouse_drag) {
+          mouse_drag = false;
+
+          const r = canvas.getBoundingClientRect();
+          mouse_ex = e.clientX - r.left;
+          mouse_ey = e.clientY - r.top;
+          const x = mouse_sx;
+          const y = mouse_sy;
+          const w = mouse_ex - mouse_sx;
+          const h = mouse_ey - mouse_sy;
+          append(x, y, w, h);
+          update();
+          updateTextArea();
+        }
+      });
+
+      const updateTextArea = () => {
+        let a = [];
+        for (let cell of cell_map.values()) {
+          const obj = { x: cell.x, y: cell.y, w: cell.w, h: cell.h };
+          a.push(obj);
+        }
+        textarea.value = JSON.stringify(a, null, '');
+      }
+
+      // UI作成終わり
+
+      // メイン
+      let target_image = null;
+
+      let num_cells = 0;
+      let cell_map = new Map();
+      let highlight_cell = -1;
+
+      // キャンバス更新
+      const update = () => {
+        // キャンバスサイズを変更
+        $('#canvas').width = target_image ? target_image.width : 256;
+        $('#canvas').height = target_image ? target_image.height : 256;
+        // 画像を描画
+        const context = $('#canvas').getContext('2d');
+        if (target_image) context.drawImage(target_image, 0, 0);
+        // セル描画
+        var ctx = canvas.getContext('2d');
+        ctx.lineWidth = 2;
+        for (let r of cell_map.values()) {
+          if (r.num == highlight_cell) {
+            ctx.strokeStyle = '#ff6633';
+            ctx.fillStyle = 'rgba(0, 192, 255, 0.75)';
+          } else {
+            ctx.strokeStyle = '#ff0000';
+            ctx.fillStyle = 'rgba(0, 64, 255, 0.5)';
+          }
+          ctx.strokeRect(r.x, r.y, r.w, r.h);
+          ctx.fillRect(r.x, r.y, r.w, r.h);
+        }
+        if (mouse_drag) {
+          ctx.strokeRect(mouse_sx, mouse_sy, mouse_ex - mouse_sx, mouse_ey - mouse_sy);
+          ctx.fillRect(mouse_sx, mouse_sy, mouse_ex - mouse_sx, mouse_ey - mouse_sy);
+        }
+      };
+
+      // セル操作関連
+      const inputListener = (e) => {
+        const cell_num = e.target.getAttribute('data-cell-id');
+        const cell = cell_map.get(parseInt(cell_num));
+        const name = e.target.name;
+        if (e.target.type === 'number') {
+          var v = parseInt(e.target.value);
+          if (Number.isInteger(v)) cell[name] = v;
+        } else {
+          cell[name] = e.target.value;
+        }
+        updateForm(cell_num);
+        update();
+        updateTextArea();
+      };
+
+      const deleteListener = (e) => {
+        const cell_num = e.target.getAttribute('data-cell-id');
+        cell_map.delete(parseInt(cell_num));
+        $('#cell_array').removeChild($('#cell-' + cell_num));
+        update();
+        updateTextArea();
+      };
+
+      // 入力セルの更新
+      var updateForm = function (cell_num) {
+        var cell = cell_map.get(parseInt(cell_num));
+        $('#cell-input-x-' + cell_num).value = cell['x'];
+        $('#cell-input-y-' + cell_num).value = cell['y'];
+        $('#cell-input-w-' + cell_num).value = cell['w'];
+        $('#cell-input-h-' + cell_num).value = cell['h'];
+      };
+
+      // UIパーツの追加
+      var appendUI = function (element, cell_num, label_text, input_type, input_name, width, input_value) {
+        if (width === void 0) width = 0;
+        var text = document.createTextNode(label_text);
+        var label = $({ tag: 'label', style: cell_label_style });
+        var input = $({ tag: 'input', style: cell_input_style });
+        input.type = input_type;
+        input.name = input_name;
+        input.id = 'cell-input-' + input_name + '-' + cell_num;
+        input.setAttribute('data-cell-id', cell_num);
+        if (width > 0) input.style.width = width + 'px';
+        if (input_type === 'number') {
+          input.addEventListener('input', inputListener, false);
+        }
+        if (input_type === 'button') {
+          input.addEventListener('click', deleteListener, false);
+        }
+        label.appendChild(text);
+        element.appendChild(label);
+        element.appendChild(input);
+      };
+
+      // 入力セルの作成
+      var createCellForm = function (cell_num) {
+        var div = $({ tag: 'div', id: 'cell-' + cell_num, style: cell_style });
+        div.setAttribute('data-cell-id', cell_num);
+        appendUI(div, cell_num, 'x', 'number', 'x', 60);
+        appendUI(div, cell_num, 'y', 'number', 'y', 60);
+        appendUI(div, cell_num, 'w', 'number', 'w', 60);
+        appendUI(div, cell_num, 'h', 'number', 'h', 60);
+        appendUI(div, cell_num, '', 'button', 'delete');
+        div.lastElementChild.style.cssFloat = 'right';
+        div.lastElementChild.value = '削除';
+        div.onmouseover = (e) => {
+          div.style.border = 'solid 2px #ff6600';
+          highlight_cell = e.target.getAttribute('data-cell-id');
+          update();
+        };
+        div.onmouseout = (e) => {
+          div.style.border = 'solid 2px rgba(0, 0, 0, 0)';
+          const c = e.target.getAttribute('data-cell-id');
+          if (highlight_cell == c) highlight_cell = -1;
+          update();
+        };
+        return div;
+      };
+
+      const append = (x, y, w, h) => {
+        $('#cell_array').appendChild(createCellForm(num_cells));
+        cell_map.set(num_cells, { x, y, w, h, num: num_cells });
+        updateForm(num_cells);
+        num_cells++;
+      }
+
+    }, false);
+  </script>
+</body>
+
+</html>

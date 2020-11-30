@@ -30,8 +30,8 @@ oo.main(() => {
 
   let load_image = null;
   let save_image = null;
-  let src = new OoRenderSprite();
-  let dst = new OoRenderSprite();
+  let src = new oo.RenderSprite();
+  let dst = new oo.RenderSprite();
 
   // キャンバス更新
   const update = () => {

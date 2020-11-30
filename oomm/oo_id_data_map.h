@@ -1,13 +1,14 @@
-//
-//  oo_id_data_map.h
-//  mt
-//
-//  Created by わぬ on 2019/11/02.
-//  Copyright © 2019 nyagoya. All rights reserved.
-//
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+#pragma once
+#include <initializer_list>
+#include <map>
+#include <vector>
 
-#ifndef oo_id_data_map_h
-#define oo_id_data_map_h
+template <class T> class OoIdDataMap : public std::map<std::string, T> {
+public:
+  OoIdDataMap(std::initializer_list<T> data) {
+    for(auto &x : data) (*this)[x._id] = x;
+  }
+};
 
-
-#endif /* oo_id_data_map_h */

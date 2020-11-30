@@ -1,13 +1,39 @@
-//
-//  oo_ios_utility_cc.h
-//  mt
-//
-//  Created by わぬ on 2019/11/07.
-//  Copyright © 2019 nyagoya. All rights reserved.
-//
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+#pragma once
+#import "oo_std.h"
 
-#ifndef oo_ios_utility_cc_h
-#define oo_ios_utility_cc_h
+class OoImage;
+class OoMemoryStream;
 
+namespace oo {
 
-#endif /* oo_ios_utility_cc_h */
+  string getDocumentsPath();
+  string getDocumentsFilePath(string filename);
+
+  string getResourcePath();
+  string getResourceFilePath(string filename);
+
+  string getDeviceName();
+
+  vector<string> getDocumentFiles();
+
+  bool loadData(string path, OoMemoryStream *stream);
+  bool loadResourceData(string filename, OoMemoryStream *stream);
+  bool loadDocumentsData(string filename, OoMemoryStream *stream);
+  bool saveData(string path, OoMemoryStream *stream);
+  bool saveResourceData(string filename, OoMemoryStream *stream);
+  bool saveDocumentsData(string filename, OoMemoryStream *stream);
+
+  void iosLog(string log_text);
+  bool checkGlError(string text);
+  string getDateTimeText(string format);
+
+  unique_ptr<OoImage> createOoImageFromFile(const string &path_name);
+  bool savePngFromOoImage(string filename, OoImage *image);
+  bool savePngFromOoImage(OoImage *image);
+
+  void messageBox(string title, string message);
+
+} // namespace oo
+

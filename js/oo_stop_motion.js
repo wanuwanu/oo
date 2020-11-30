@@ -23,7 +23,7 @@ class OoStopMotion {
     oo.parallel(function* () {
       for (let i = 0; i < n; i++) {
         var path_name = oo.addPath(self.image_base_path, self.image_files[i]);
-        self.images[i] = yield oo.xnCreateImage(path_name);
+        self.images[i] = yield oo.nnCreateImage(path_name);
       }
     }, callback);
   }

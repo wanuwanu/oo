@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>memo</title>
+  <style>
+    .textarea_class {
+      width: 500px;
+      height: 800px;
+      font-size: 16px;
+      font-family: "Hiragino Kaku Gothic ProN";
+    }
+
+    .css_area_class {
+      width: 300px;
+      height: 10em;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    // 追加ヘルパ関数
+    const $ = (...args) => {
+      const p = (typeof args[0] === 'string') ? document.createElement(args[0]) : args[0];
+      for (let i = 1; i < args.length; i++) p.appendChild((typeof args[i] === 'string') ? document.createTextNode(args[i]) : args[i]);
+      return p;
+    };
+    // oo lib
+    // const $ = (...args) => {
+    //   const p = (typeof args[0] === 'string') ? ((args[0].charAt(0) === '#') ? document.getElementById(args[0].substr(1)) : document.createElement(args[0])) : args[0];
+    //   for (let i = 1; i < args.length; i++) p.appendChild((typeof args[i] === 'string') ? document.createTextNode(args[i]) : args[i]);
+    //   return p;
+    // };
+    // oo lib
+
+
+
+    const makeCharacterCodeInfo = text => {
+      const o = {
+        total: text.length,
+        tab: 0, lf: 0, control: 0,
+        character: 0, space: 0,
+        character_2: 0, space_2: 0,
+        ascii_2: 0, hankana_2: 0, surrogate: 0,
+      };
+      for (let i = 0; i < text.length; i++) {
+        const c = text.charCodeAt(i);
+        if (c <= 0x7f) {
+          // ASCII半角文字
+          if (c < 0x09) o.control++;
+          if (c === 0x09) o.tab++;
+          if (c === 0x0a) o.lf++;
+          if (c >= 0x0b && c < 0x20) o.control++;
+          if (c === 0x20) o.space++;
+          if (c >= 0x21 && c < 0x7f) o.character++;
+          if (c === 0x7f) o.control++;
+        } else {
+          // 非ASCII文字(全角等)
+          if (c < 0x3000) o.character_2++;
+          if (c === 0x3000) o.space_2++;
+          if (c >= 0x3001 && c < 0xd800) o.character_2++;
+          if (c >= 0xd800 && c < 0xdc00) o.surrogate++;
+          if (c >= 0xdc00) o.character_2++;
+          // 警告用情報
+          // 全角ASCII文字(英数記号)
+          if (c >= 0xff01 && c <= 0xff60) o.ascii_2++;
+          // 半角かな
+          if (c >= 0xff61 && c <= 0xff9f) o.hankana_2++;
+        }
+      }
+      return o;
+    };
+    // 追加ヘルパ関数
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const textarea = document.createElement('textarea');
+      textarea.className = 'textarea_class';
+      document.body.appendChild(textarea);
+      // load text data
+      const name = 'local_memo_data';
+      textarea.value = JSON.parse(localStorage.getItem(name));
+      // auto save
+      textarea.addEventListener('input', () => {
+        localStorage.setItem(name, JSON.stringify(textarea.value));
+      }, false);
+      // watch local storage & auto reload
+      window.addEventListener('storage', () => {
+        textarea.value = JSON.parse(localStorage.getItem(name));
+      }, false);
+
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // スタイル変更機能
+      // CSS
+      const css_area = document.createElement('textarea');
+      css_area.className = 'css_area_class';
+      document.body.appendChild(css_area);
+
+      const css_storage = 'local_memo_css';
+      let style_text = JSON.parse(localStorage.getItem(css_storage));
+      if (!style_text) style_text = 'width: 500px;\nheight: 800px;\nfont-size: 16px;\nfont-family: "Hiragino Kaku Gothic ProN";';
+      css_area.value = style_text;
+
+      let style = null;
+      const updateStyle = () => {
+        if (style) document.head.removeChild(style);
+        style = document.createElement('style');
+        document.head.appendChild(style);
+        const rule = '.textarea_class {' + css_area.value + '}';
+        style.sheet.insertRule(rule, style.sheet.cssRules.length);
+      };
+      updateStyle();
+
+      css_area.addEventListener('input', () => {
+        localStorage.setItem(css_storage, JSON.stringify(css_area.value));
+        updateStyle();
+      });
+
+      // 文字集計機能
+      const info = document.createElement('div');
+      document.body.appendChild(info);
+      textarea.addEventListener('input', () => { updateInfo(); }, false);
+
+      const table = $('table');
+      table.border = 2;
+      table.style.borderCollapse = 'collapse';
+      const table_cells = [];
+
+      const table_rows = (new Array(4)).fill().map(x => $('tr'));
+      table_rows.forEach(tr => {
+        tr.align = 'right';
+        const cells = (new Array(8)).fill().map(x => $('td'));
+        $(tr, ...cells);
+        table_cells.push(...cells);
+      });
+      $(table, ...table_rows);
+      $(document.body, table);
+
+      const updateInfo = () => {
+        const ci = makeCharacterCodeInfo(textarea.value);
+        let text = `全 ${ci.total} 文字( ${ci.lf + 1} 行)`;
+        info.textContent = text;
+
+        const row0 = ['', '表示文字', '空白', 'タブ', '改行', 'その他制御', 'サロゲートペア', '合計'];
+        const row1 = ['ASCII文字', ci.character, ci.space, ci.tab, ci.lf, ci.control, '', 0];
+        const row2 = ['全角等非ASCII文字', ci.character_2, ci.space_2, '', '', '', ci.surrogate, 0];
+        const row3 = ['合計', 0, 0, 0, 0, 0, 0, 0];
+        row1[row1.length - 1] = row1.slice(1).reduce((a, v) => { return a * 1 + v * 1; });
+        row2[row2.length - 1] = row2.slice(1).reduce((a, v) => { return a * 1 + v * 1; });
+        for (let x = 1; x < row3.length; x++) row3[x] = (row1[x] * 1) + (row2[x] * 1);
+
+        const cells = [...row0, ...row1, ...row2, ...row3];
+        table_cells.forEach((v, i) => { v.textContent = cells[i]; });
+      };
+
+      updateInfo();
+
+
+      // 欲しい機能
+      // エクスポート/インポート
+      // 用紙追加/変更/削除
+      // 履歴
+      // タイトル(ファイル名)
+      // 複数メモ
+
+
+
+      const button = $('input');
+      button.type = 'button';
+      button.value = 'CSS設定';
+      button.onclick = () => {
+        let style = css_area.style;
+        style.display = (style.display === 'none') ? 'inline-block' : 'none';
+      };
+      $(document.body, button);
+
+      const btn_info = $('input');
+      btn_info.type = 'button';
+      btn_info.value = '詳細情報';
+      btn_info.onclick = () => {
+        let style = table.style;
+        style.display = (style.display === 'none') ? 'table' : 'none';
+      };
+      $(document.body, btn_info);
+
+      // const btn_layout = $('input');
+      // btn_layout.type = 'button';
+      // btn_layout.value = '配置変更';
+      // $(document.body, btn_layout);
+
+    }, false);
+  </script>
+</body>
+
+</html>

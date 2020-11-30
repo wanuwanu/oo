@@ -233,7 +233,7 @@ oo.main(() => {
       for (var cell of cell_map.values()) {
         if (cell['image']) {
           const path_name = oo.addPath(layout.image_base_path, cell['image']);
-          cell.img = yield oo.xnCreateImage(path_name);
+          cell.img = yield oo.nnCreateImage(path_name);
         }
       }
     }, update);

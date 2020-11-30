@@ -102,7 +102,7 @@ oo.setTextAttributes = function (context, fontSize, fillStyle, textAlign, textBa
 
 // 画像内の矩形サイズでcanvasをリサイズして描画
 // rect: { x, y, w, h }
-var resizeCanvasDrawImage = function (canvas_id, image, rect, scale) {
+oo.resizeCanvasDrawImage = function (canvas_id, image, rect, scale) {
   var canvas = document.getElementById(canvas_id);
   canvas.width = rect.w * scale;
   canvas.height = rect.h * scale;
@@ -112,7 +112,7 @@ var resizeCanvasDrawImage = function (canvas_id, image, rect, scale) {
 
 // ブラウザのダウンロード指定のフォルダに保存する
 // ext 'jpg' || ' png'
-var saveCanvasImage = function (canvas_id, file_name, ext, quality) {
+oo.saveCanvasImage = function (canvas_id, file_name, ext, quality) {
   var canvas = document.getElementById(canvas_id);
   var link = document.createElement('a');
   if (ext === 'jpg') link.href = canvas.toDataURL('image/jpeg', quality);

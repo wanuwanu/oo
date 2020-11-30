@@ -118,7 +118,7 @@ oo.main(() => {
   // UI作成ここまで
 
   // メイン
-  var rsp = new OoRenderSprite();
+  var rsp = new oo.RenderSprite();
   var img_width = 256;
   var img_height = 256;
   $('#width').value = img_width;

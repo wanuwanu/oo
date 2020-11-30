@@ -10,7 +10,7 @@ bool OoIosDrawText::create(OoImage *image, const string &text, const string &fon
   if(font_name == ""){
     font = (bold) ? [UIFont boldSystemFontOfSize:font_size] : [UIFont systemFontOfSize:font_size];
   }else{
-    font = [UIFont fontWithName:NSStringMake(font_name) size:font_size];
+    font = [UIFont fontWithName:oo::NSStringMake(font_name) size:font_size];
   }
 
   NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
@@ -45,7 +45,7 @@ bool OoIosDrawText::create(OoImage *image, const string &text, const string &fon
   image->createWithSize(width, height);
 
   CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
-  CGContextRef bitmap_context = CGBitmapContextCreate(image->getPixelBuffer(), width, height, 8, width * 4, color_space, kCGImageAlphaPremultipliedLast);
+  CGContextRef bitmap_context = CGBitmapContextCreate(image->_pixel_buffer, width, height, 8, width * 4, color_space, kCGImageAlphaPremultipliedLast);
   CGColorSpaceRelease(color_space);
 
   CGContextTranslateCTM(bitmap_context, 0, height);

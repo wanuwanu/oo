@@ -8,7 +8,7 @@ oo._$._getElement = function (obj) {
   if (!obj) return null;
   if (typeof obj === 'string') {
     if (obj.charAt(0) === '#') {
-      var id = obj.substr(1);
+      const id = obj.substr(1);
       return document.getElementById(id) || oo._$._elements[id];
     }
     return document.createElement(obj);
@@ -16,10 +16,10 @@ oo._$._getElement = function (obj) {
   if (typeof obj === 'object') {
     if (obj instanceof Node) return obj;
     if (obj.tag) {
-      var element = document.createElement(obj.tag);
+      const element = document.createElement(obj.tag);
       if (element) {
-        var key_array = Object.keys(obj);
-        for (var key of key_array) {
+        const key_array = Object.keys(obj);
+        for (let key of key_array) {
           if (key !== 'tag' && key !== 'style') element[key] = obj[key];
           if (key === 'style') Object.assign(element.style, obj.style);
         }
@@ -49,7 +49,7 @@ oo._$._getElement = function (obj) {
 //
 oo.$ = function (...args) {
   if (args.length === 0) return null;
-  var parent = oo._$._getElement(args[0]);
+  const parent = oo._$._getElement(args[0]);
   if (!parent) return null;
   for (let i = 1; i < args.length; i++) {
     if (typeof args[i] === 'string') {
