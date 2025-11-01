@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<!--
+// OoLibrary Copyright (c) wanu@nyagoya
+// Released under the MIT license http://opensource.org/licenses/mit-license.php
+-->
+
+<head>
+  <meta charset="utf-8">
+  <title>memo(markdown対応版)</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://wanuwanu.github.io/oo/js/dist/oo.q.min.js"></script>
+  <style>
+    .editor-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-area-class {
+      width: 500px;
+      height: 800px;
+      font-size: 16px;
+      font-family: "Hiragino Kaku Gothic ProN";
+    }
+
+    .css-area-class {
+      margin: 10px 0px;
+      width: 300px;
+      height: 10em;
+    }
+
+    .markdown-box {
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    .markdown-box blockquote {
+      border-left: 5px solid #ddd;
+      background-color: #f0f0f0;
+      margin-left: 5px;
+      padding: 0px 5px;
+      color: #333;
+    }
+
+    .markdown-box pre {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+
+    #info-table {
+      border: 2px solid;
+      border-collapse: collapse;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="editor-container">
+    <textarea id="input-area" class="input-area-class"></textarea>
+    <div id="content-area" class="markdown-box"></div>
+  </div>
+  <textarea id="css-area" class="css-area-class"></textarea>
+  <div id="info"></div>
+  <table id="info-table"></table>
+  <div>
+    <button id="css-btn">CSS設定</button>
+    <button id="info-btn">詳細情報</button>
+  </div>
+
+  <script>
+    const Q = oo.$;
+
+    // 追加ヘルパ関数
+    const makeCharacterCodeInfo = text => {
+      const o = {
+        total: text.length,
+        tab: 0, lf: 0, control: 0,
+        character: 0, space: 0,
+        character_2: 0, space_2: 0,
+        ascii_2: 0, hankana_2: 0, surrogate: 0,
+      };
+      for (let i = 0; i < text.length; i++) {
+        const c = text.charCodeAt(i);
+        if (c <= 0x7f) {
+          // ASCII半角文字
+          if (c < 0x09) o.control++;
+          if (c === 0x09) o.tab++;
+          if (c === 0x0a) o.lf++;
+          if (c >= 0x0b && c < 0x20) o.control++;
+          if (c === 0x20) o.space++;
+          if (c >= 0x21 && c < 0x7f) o.character++;
+          if (c === 0x7f) o.control++;
+        } else {
+          // 非ASCII文字(全角等)
+          if (c < 0x3000) o.character_2++;
+          if (c === 0x3000) o.space_2++;
+          if (c >= 0x3001 && c < 0xd800) o.character_2++;
+          if (c >= 0xd800 && c < 0xdc00) o.surrogate++;
+          if (c >= 0xdc00) o.character_2++;
+          // 警告用情報
+          // 全角ASCII文字(英数記号)
+          if (c >= 0xff01 && c <= 0xff60) o.ascii_2++;
+          // 半角かな
+          if (c >= 0xff61 && c <= 0xff9f) o.hankana_2++;
+        }
+      }
+      return o;
+    };
+    // 追加ヘルパ関数
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // テキストエリア
+      const textArea = Q("#input-area");
+      // load text data
+      const name = "local_memo_data";
+      textArea.value = JSON.parse(localStorage.getItem(name));
+      // auto save
+      textArea.addEventListener("input", () => {
+        localStorage.setItem(name, JSON.stringify(textArea.value));
+        updatePreview();
+      }, false);
+      // watch local storage & auto reload
+      window.addEventListener("storage", () => {
+        textArea.value = JSON.parse(localStorage.getItem(name));
+      }, false);
+
+      // マークダウン表示エリア
+      const contentArea = Q("#content-area");
+      // プレビューを更新する関数
+      const updatePreview = () => {
+        contentArea.innerHTML = marked.parse(textArea.value);
+      };
+      updatePreview();
+
+      // スタイル変更機能
+      // CSS
+      const css_area = Q("#css-area");
+      const css_storage = "local_memo_css";
+      let style_text = JSON.parse(localStorage.getItem(css_storage));
+      if (!style_text) style_text = 'width: 500px;\nheight: 800px;\nfont-size: 16px;\nfont-family: "Hiragino Kaku Gothic ProN";';
+      css_area.value = style_text;
+      css_area.addEventListener("input", () => {
+        localStorage.setItem(css_storage, JSON.stringify(css_area.value));
+        updateStyle();
+      });
+      let style = null;
+      const updateStyle = () => {
+        if (style) document.head.removeChild(style);
+        style = document.createElement("style");
+        document.head.appendChild(style);
+        const rule = ".input-area-class {" + css_area.value + "}";
+        style.sheet.insertRule(rule, style.sheet.cssRules.length);
+      };
+      updateStyle();
+
+      // 文字集計機能
+      textArea.addEventListener("input", () => {
+        updateInfo();
+      });
+      const table = Q("#info-table");
+      const table_cells = [];
+      const table_rows = (new Array(4)).fill().map(x => Q("tr"));
+      table_rows.forEach(tr => {
+        tr.align = "right";
+        const cells = (new Array(8)).fill().map(x => Q("td"));
+        Q(tr, ...cells);
+        table_cells.push(...cells);
+      });
+      Q(table, ...table_rows);
+
+      const updateInfo = () => {
+        const ci = makeCharacterCodeInfo(textArea.value);
+        let text = `全 ${ci.total} 文字( ${ci.lf + 1} 行)`;
+        Q("#info").textContent = text;
+
+        const row0 = ["", "表示文字", "空白", "タブ", "改行", "その他制御", "サロゲートペア", "合計"];
+        const row1 = ["ASCII文字", ci.character, ci.space, ci.tab, ci.lf, ci.control, "", 0];
+        const row2 = ["全角等非ASCII文字", ci.character_2, ci.space_2, "", "", "", ci.surrogate, 0];
+        const row3 = ["合計", 0, 0, 0, 0, 0, 0, 0];
+        row1[row1.length - 1] = row1.slice(1).reduce((a, v) => { return a * 1 + v * 1; });
+        row2[row2.length - 1] = row2.slice(1).reduce((a, v) => { return a * 1 + v * 1; });
+        for (let x = 1; x < row3.length; x++) row3[x] = (row1[x] * 1) + (row2[x] * 1);
+
+        const cells = [...row0, ...row1, ...row2, ...row3];
+        table_cells.forEach((v, i) => { v.textContent = cells[i]; });
+      };
+      updateInfo();
+
+      Q("#css-btn").onclick = () => {
+        let style = css_area.style;
+        style.display = (style.display === "none") ? "inline-block" : "none";
+      };
+      Q("#info-btn").onclick = () => {
+        let style = table.style;
+        style.display = (style.display === "none") ? "table" : "none";
+      };
+    }, false);
+  </script>
+</body>
+
+</html>
